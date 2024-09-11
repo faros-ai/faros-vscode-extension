@@ -19,12 +19,12 @@
   "main": "./dist/extension.js",
   "contributes": {
     "configuration": {
-      "title": "Faros",
+      "title": "Faros AI",
       "properties": {
         "faros.apiKey": {
           "type": "string",
           "default": "",
-          "description": "API Key for Faros"
+          "description": "API Key for Faros AI"
         },
         "faros.vcsUid": {
           "type": "string",
@@ -34,7 +34,7 @@
         "faros.url": {
           "type": "string",
           "default": "https://prod.api.faros.ai",
-          "description": "Faros endpoint"
+          "description": "Faros AI endpoint"
         },
         "faros.graph": {
           "type": "string",
