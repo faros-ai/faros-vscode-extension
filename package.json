@@ -12,6 +12,10 @@
   "activationEvents": [
     "onStartupFinished"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/faros-ai/faros-vscode-extension.git"
+  },
   "main": "./dist/extension.js",
   "contributes": {
     "configuration": {
@@ -60,6 +64,7 @@
     "compile": "webpack",
     "watch": "webpack --watch",
     "package": "webpack --mode production --devtool hidden-source-map",
+    "vsce": "vsce package",
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
@@ -81,6 +86,7 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
+    "@vscode/vsce": "^3.1.0",
     "faros-js-client": "^0.5.2"
   }
 }
