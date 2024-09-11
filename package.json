@@ -1,10 +1,10 @@
 {
   "name": "faros-vscode-extension",
-  "displayName": "faros-vscode-extension",
-  "description": "",
-  "version": "0.0.1",
+  "displayName": "Faros AI",
+  "description": "Faros AI's Visual Studio Code extension",
+  "version": "0.0.2",
   "engines": {
-    "vscode": "^1.93.0"
+    "vscode": "^1.90.0"
   },
   "categories": [
     "Other"
@@ -74,7 +74,7 @@
   "devDependencies": {
     "@types/mocha": "^10.0.6",
     "@types/node": "18.x",
-    "@types/vscode": "^1.93.0",
+    "@types/vscode": "^1.82.0",
     "@typescript-eslint/eslint-plugin": "^6.13.1",
     "@typescript-eslint/parser": "^6.13.1",
     "@vscode/test-cli": "^0.0.4",
