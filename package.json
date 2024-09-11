@@ -1,0 +1,86 @@
+{
+  "name": "faros-vscode-extension",
+  "displayName": "faros-vscode-extension",
+  "description": "",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.93.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "Faros",
+      "properties": {
+        "faros.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API Key for Faros"
+        },
+        "faros.vcsUid": {
+          "type": "string",
+          "default": "",
+          "description": "Version Control System User ID"
+        },
+        "faros.url": {
+          "type": "string",
+          "default": "https://prod.api.faros.ai",
+          "description": "Faros endpoint"
+        },
+        "faros.graph": {
+          "type": "string",
+          "default": "default",
+          "description": "Graph"
+        },
+        "faros.origin": {
+          "type": "string",
+          "default": "faros-vscode-extension",
+          "description": "Origin"
+        },
+        "faros.batchSize": {
+          "type": "number",
+          "default": 500,
+          "description": "Batch size"
+        },
+        "faros.batchInterval": {
+          "type": "number",
+          "default": 60000,
+          "description": "Send batch interval"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.6",
+    "@types/node": "18.x",
+    "@types/vscode": "^1.93.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.1",
+    "@typescript-eslint/parser": "^6.13.1",
+    "@vscode/test-cli": "^0.0.4",
+    "@vscode/test-electron": "^2.3.8",
+    "eslint": "^8.54.0",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.3.2",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "faros-js-client": "^0.5.2"
+  }
+}
