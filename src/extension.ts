@@ -31,7 +31,11 @@ function checkAndLogEvents() {
 setInterval(checkAndLogEvents, batchInterval);
 
 function isTabPress(change: vscode.TextDocumentContentChangeEvent): boolean {
-  return change.text.length > 1 && change.rangeLength !== 0;
+  // return change.text.length > 1 && change.rangeLength !== 0; 
+  // this condition will be true for any document change event that introduces more than
+  // one character into the document. This will capture all auto-completions, but unfortunatlly
+  // will also capture copy/paste events.
+  return change.text.length > 1;
 }
 
 function getCurrentFolderName(): string | null {
