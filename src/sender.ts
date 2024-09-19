@@ -4,7 +4,7 @@ import {
   Mutation,
   QueryBuilder,
 } from "faros-js-client";
-import { AutoCompletionEvent } from "./test/types";
+import { AutoCompletionEvent } from "./types";
 import * as vscode from "vscode";
 
 const config = vscode.workspace.getConfiguration('faros');

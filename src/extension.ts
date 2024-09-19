@@ -1,7 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
-import { AutoCompletionEvent } from "./test/types";
+import { AutoCompletionEvent } from "./types";
 import { send } from "./sender";
 
 let statusBarItem: vscode.StatusBarItem;
