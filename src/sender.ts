@@ -6,16 +6,16 @@ import {
 } from "faros-js-client";
 import { AutoCompletionEvent } from "./types";
 import * as vscode from "vscode";
+import gitUserName from "git-user-name";
+import gitUserEmail from "git-user-email";
 
 const config = vscode.workspace.getConfiguration('faros');
 const faros_api_url = config.get<string>('url') || "https://prod.api.faros.ai";
-const vcs_uid = config.get<string>('vcsUid');
 const faros_api_key = config.get<string>('apiKey') || "<key>";
 const graph = config.get<string>('graph') || "default";
 const origin = config.get<string>('origin') || 'faros-vscode-extension';
 const maxBatchSize = Number(config.get<string>('batchSize')) || 500;
-
-console.log(`URL: ${faros_api_url}, Graph: ${graph}, Origin: ${origin}`);
+const vcs_uid = config.get<string>('vcsUid') || gitUserName() || gitUserEmail();
 
 async function* mutations(
   events: AutoCompletionEvent[]
@@ -52,6 +52,12 @@ async function sendToFaros(
   batch: Mutation[]
 ): Promise<void> {
   console.log(`Sending...`);
+  console.log("Faros API URL:", faros_api_url);
+  console.log("Faros API Key:", faros_api_key);
+  console.log("Graph:", graph);
+  console.log("Origin:", origin);
+  console.log("Max Batch Size:", maxBatchSize);
+  console.log("VCS UID:", vcs_uid);
   console.log('Mutation:', batchMutation(batch));
   await faros.sendMutations(graph, batch);
   console.log(`Done.`);
