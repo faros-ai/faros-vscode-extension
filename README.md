@@ -3,7 +3,7 @@
 Faros AI's Visual Studio Code Extension
 
 # Installation
-1. Download the latest version: https://github.com/faros-ai/faros-vscode-extension/releases/download/v0.0.2/faros-vscode-extension-0.0.2.vsix
+1. Download the [latest version](https://github.com/faros-ai/faros-vscode-extension/releases/latest)
 2. Install it by hitting cmd+shit+p then type `install from vsix` then choose the file you downloaded
 3. Configure the extension:
 - Go to VSCode settings by hitting cmd+,
