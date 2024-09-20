@@ -15,8 +15,6 @@ let currentFolderName: string | null = null;
 
 let autocompletionEvents: AutoCompletionEvent[] = [];
 
-const batchInterval = farosConfig.batchInterval;
-
 // Function to check and log events every minute
 function checkAndLogEvents() {
   if (autocompletionEvents.length > 0) {
@@ -28,12 +26,12 @@ function checkAndLogEvents() {
 }
 
 // Set interval to check and log events every minute (60000 milliseconds)
-setInterval(checkAndLogEvents, batchInterval);
+setInterval(checkAndLogEvents, farosConfig.batchInterval());
 
 function isTabPress(change: vscode.TextDocumentContentChangeEvent): boolean {
   // return change.text.length > 1 && change.rangeLength !== 0; 
   // this condition will be true for any document change event that introduces more than
-  // one character into the document. This will capture all auto-completions, but unfortunatlly
+  // one character into the document. This will capture all auto-completions, but unfortunately
   // will also capture copy/paste events.
   return change.text.length > 1;
 }

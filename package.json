@@ -2,7 +2,7 @@
   "name": "faros-vscode-extension",
   "displayName": "Faros AI",
   "description": "Faros AI's Visual Studio Code extension",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "engines": {
     "vscode": "^1.90.0"
   },
@@ -30,6 +30,16 @@
           "type": "string",
           "default": "",
           "description": "Version Control System User ID"
+        },
+        "faros.vcsEmail": {
+          "type": "string",
+          "default": "",
+          "description": "Version Control System Email"
+        },
+        "faros.vcsName": {
+          "type": "string",
+          "default": "",
+          "description": "Version Control System Name"
         },
         "faros.url": {
           "type": "string",
@@ -74,6 +84,7 @@
   "devDependencies": {
     "@types/git-user-email": "^0.2.2",
     "@types/git-user-name": "^2.0.3",
+    "@types/git-username": "^1.0.5",
     "@types/mocha": "^10.0.6",
     "@types/node": "18.x",
     "@types/vscode": "^1.82.0",
@@ -91,6 +102,7 @@
     "@vscode/vsce": "^3.1.0",
     "faros-js-client": "^0.5.2",
     "git-user-email": "^0.2.2",
-    "git-user-name": "^2.0.0"
+    "git-user-name": "^2.0.0",
+    "git-username": "^1.0.0"
   }
 }

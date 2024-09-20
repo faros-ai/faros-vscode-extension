@@ -6,22 +6,18 @@ import {
 } from "faros-js-client";
 import { AutoCompletionEvent } from "./types";
 import { farosConfig } from "./config";
-
-const faros_api_url = farosConfig.url;
-const faros_api_key = farosConfig.apiKey;
-const graph = farosConfig.graph;
-const origin = farosConfig.origin;
-const maxBatchSize = farosConfig.batchSize;
-const vcs_uid = farosConfig.vcsUid;
+import { config } from "process";
 
 async function* mutations(
   events: AutoCompletionEvent[]
 ): AsyncGenerator<Mutation> {
   // The QueryBuilder manages the origin for you
-  const qb = new QueryBuilder(origin);
+  const qb = new QueryBuilder(farosConfig.origin());
 
   const vcs_User = {
-    uid: vcs_uid,
+    uid: farosConfig.vcsUid(),
+    name: farosConfig.vcsName(),
+    email: farosConfig.vcsEmail(),
   };
   yield qb.upsert({ vcs_User });
 
@@ -55,16 +51,16 @@ async function sendToFaros(
 
 export async function send(events: AutoCompletionEvent[]): Promise<void> {
   const faros = new FarosClient({
-    url: faros_api_url,
-    apiKey: faros_api_key,
+    url: farosConfig.url(),
+    apiKey: farosConfig.apiKey(),
   });
 
   let batchNum = 1;
   let batch: Mutation[] = [];
   for await (const mutation of mutations(events)) {
-    if (batch.length >= maxBatchSize) {
+    if (batch.length >= farosConfig.batchSize()) {
       console.log(`------ Batch ${batchNum} - Size: ${batch.length} ------`);
-      await sendToFaros(faros, graph, batch);
+      await sendToFaros(faros, farosConfig.graph(), batch);
       batchNum++;
       batch = [];
     }
@@ -73,6 +69,6 @@ export async function send(events: AutoCompletionEvent[]): Promise<void> {
 
   if (batch.length > 0) {
     console.log(`------ Batch ${batchNum} - Size: ${batch.length} ------`);
-    await sendToFaros(faros, graph, batch);
+    await sendToFaros(faros, farosConfig.graph(), batch);
   }
 }
