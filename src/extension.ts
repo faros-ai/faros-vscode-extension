@@ -10,8 +10,6 @@ let ev: vscode.Disposable | null = null;
 let suggestionsCount = 0;
 let charCount = 0;
 let previousText = "";
-let currentFolderStartTime: Date | null = null;
-let currentFolderName: string | null = null;
 
 let autocompletionEvents: AutoCompletionEvent[] = [];
 
@@ -35,31 +33,6 @@ function isTabPress(change: vscode.TextDocumentContentChangeEvent): boolean {
   // will also capture copy/paste events.
   return change.text.length > 1;
 }
-
-function getCurrentFolderName(): string | null {
-  if (
-    vscode.workspace.workspaceFolders &&
-    vscode.workspace.workspaceFolders.length > 0
-  ) {
-    return vscode.workspace.workspaceFolders[0].name;
-  }
-  return null;
-}
-
-function updateFolderTime() {
-  const currentFolderEndTime = new Date();
-  if (currentFolderStartTime && currentFolderName) {
-    const duration =
-      currentFolderEndTime.getTime() - currentFolderStartTime.getTime();
-    if (duration > 0) {
-      // update server
-    }
-  }
-  currentFolderStartTime = currentFolderEndTime;
-  currentFolderName = getCurrentFolderName();
-}
-
-vscode.workspace.onDidChangeWorkspaceFolders(updateFolderTime);
 
 function registerSuggestionListener() {
   if (!statusBarItem) {
@@ -100,9 +73,6 @@ function registerSuggestionListener() {
               charCountChange: currentLengthChange,
               fileName: activeEditor.document.fileName,
             });
-
-            //update server
-            updateFolderTime();
           }
         }
       }
@@ -118,40 +88,10 @@ export function activate(context: vscode.ExtensionContext) {
   // This line of code will only be executed once when your extension is activated
   console.log("Faros VSCode extension is now active!");
   updateConfig();
-  
-  if (
-    vscode.workspace.workspaceFolders &&
-    vscode.workspace.workspaceFolders.length > 0
-  ) {
-    const currentFolder = vscode.workspace.workspaceFolders[0];
-    const folderName = currentFolder.name;
-
-    currentFolderStartTime = new Date();
-    currentFolderName = folderName;
-  }
-
   registerSuggestionListener();
-
-  // The command has been defined in the package.json file
-  // Now provide the implementation of the command with registerCommand
-  // The commandId parameter must match the command field in package.json
-  //   let disposable = vscode.commands.registerCommand(
-  //     "vscode-copilot-stats.helloWorld",
-  //     () => {
-  //       // The code you place here will be executed every time your command is executed
-  //       // Display a message box to the user
-  //       vscode.window.showInformationMessage(
-  //         "Hello World from vscode-copilot-stats!"
-  //       );
-  //     }
-  //   );
-
-  //   context.subscriptions.push(disposable);
 }
 
 // This method is called when your extension is deactivated
 export function deactivate() {
   console.log("Faros VSCode extension is now inactive!");
-
-  updateFolderTime();
 }

@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import gitUserName from "git-user-name";
 import gitUserEmail from "git-user-email";
-import gitUsername from "git-username";
+import { createHash, randomUUID } from "crypto";
 
 export interface FarosConfig {
   apiKey: () => string;
@@ -22,9 +22,14 @@ export interface FarosConfig {
 
 export const farosConfig: FarosConfig = {
   apiKey: () => config.get('apiKey') || '',
-  vcsUid: () => config.get('vcsUid') || '',
-  vcsEmail: () => config.get('vcsEmail') || gitUserEmail() || '',
-  vcsName: () => config.get('vcsName') || gitUserName() || '',
+  vcsUid: () => {
+    if (config.get('vcsUid') === undefined || config.get('vcsUid') === '') {
+      updateConfig();
+    }
+    return config.get('vcsUid') || '';
+  },
+  vcsEmail: () => config.get('vcsEmail') || '',
+  vcsName: () => config.get('vcsName') || '',
   url: () => config.get('url') || 'https://prod.api.faros.ai',
   graph: () => config.get('graph') || 'default',
   origin: () => config.get('origin') || 'faros-vscode-extension',
@@ -45,16 +50,16 @@ export function updateConfig(): void {
       console.error('Error reading .faros-config.json:', error);
     }
   }
-
-  if (config.get('vcsName') === undefined || config.get('vcsName') === '') { 
+  if (farosConfig.vcsName() === '') {
     config.update('vcsName', gitUserName() || '', vscode.ConfigurationTarget.Global);
   }
-  if (config.get('vcsEmail') === undefined || config.get('vcsEmail') === '') { 
+  if (farosConfig.vcsEmail() === '') {
     config.update('vcsEmail', gitUserEmail() || '', vscode.ConfigurationTarget.Global);
   }
-  if (config.get('vcsUid') === undefined || config.get('vcsUid') === '') { 
-    config.update('vcsUid', gitUsername() || '', vscode.ConfigurationTarget.Global);
+  if (farosConfig.vcsUid() === '') {
+    const hash = createHash('sha256');
+    hash.update(farosConfig.vcsName() || farosConfig.vcsEmail());
+    const vcsUid = hash.digest('hex').substring(0, 8) || randomUUID();
+    config.update('vcsUid', vcsUid, vscode.ConfigurationTarget.Global);
   }
 }
-
-
