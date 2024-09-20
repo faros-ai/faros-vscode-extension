@@ -69,8 +69,8 @@ function registerSuggestionListener() {
       vscode.StatusBarAlignment.Right,
       100
     );
-    statusBarItem.text = "Auto-compilations: 0";
-    statusBarItem.tooltip = "Auto-compilations Count";
+    statusBarItem.text = "Autocompletions: 0";
+    statusBarItem.tooltip = "Autocompletions Count";
     statusBarItem.show();
   }
 
@@ -90,11 +90,11 @@ function registerSuggestionListener() {
             suggestionsCount++;
             charCount += currentLengthChange;
             statusBarItem.text =
-              "Auto-compilations: " +
+              "Autocompletions: " +
               suggestionsCount +
               " (" +
               charCount +
-              " characters)";
+              " chars)";
 
             // Store the event in memory
             autocompletionEvents.push({
