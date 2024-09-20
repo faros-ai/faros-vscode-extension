@@ -3,6 +3,7 @@
 import * as vscode from "vscode";
 import { AutoCompletionEvent } from "./types";
 import { send } from "./sender";
+import { farosConfig, updateConfig } from "./config";
 
 let statusBarItem: vscode.StatusBarItem;
 let ev: vscode.Disposable | null = null;
@@ -14,8 +15,7 @@ let currentFolderName: string | null = null;
 
 let autocompletionEvents: AutoCompletionEvent[] = [];
 
-const config = vscode.workspace.getConfiguration('faros');
-const batchInterval = Number(config.get<string>('batchInterval')) || 60000; // 1 minute
+const batchInterval = farosConfig.batchInterval;
 
 // Function to check and log events every minute
 function checkAndLogEvents() {
@@ -119,7 +119,8 @@ export function activate(context: vscode.ExtensionContext) {
   // Use the console to output diagnostic information (console.log) and errors (console.error)
   // This line of code will only be executed once when your extension is activated
   console.log("Faros VSCode extension is now active!");
-
+  updateConfig();
+  
   if (
     vscode.workspace.workspaceFolders &&
     vscode.workspace.workspaceFolders.length > 0
