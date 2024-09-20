@@ -3,6 +3,6 @@ if command -v /usr/local/bin/cursor &> /dev/null
 then
     /usr/local/bin/cursor --install-extension faros-vscode-extension.vsix
 else
-    code --install-extension faros-vscode-extension.vsix
+   /usr/local/bin/code --install-extension faros-vscode-extension.vsix
 fi
 
