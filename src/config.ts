@@ -10,7 +10,7 @@ import { createHash, randomUUID } from "crypto";
 
 export interface FarosConfig {
   apiKey: () => string;
-  vcsUid: () => string;
+  vcsUid: (update?: boolean) => string;
   vcsEmail: () => string;
   vcsName: () => string;
   url: () => string;
@@ -22,9 +22,11 @@ export interface FarosConfig {
 
 export const farosConfig: FarosConfig = {
   apiKey: () => config.get('apiKey') || '',
-  vcsUid: () => {
+  vcsUid: (update = true) => {
     if (config.get('vcsUid') === undefined || config.get('vcsUid') === '') {
-      updateConfig();
+      if (update) {
+        updateConfig();
+      }
     }
     return config.get('vcsUid') || '';
   },
@@ -56,9 +58,9 @@ export function updateConfig(): void {
   if (farosConfig.vcsEmail() === '') {
     config.update('vcsEmail', gitUserEmail() || '', vscode.ConfigurationTarget.Global);
   }
-  if (farosConfig.vcsUid() === '') {
+  if (farosConfig.vcsUid(false) === '') {
     const hash = createHash('sha256');
-    hash.update(farosConfig.vcsName() || farosConfig.vcsEmail());
+    hash.update(farosConfig.vcsName() || farosConfig.vcsEmail() || randomUUID());
     const vcsUid = hash.digest('hex').substring(0, 8) || randomUUID();
     config.update('vcsUid', vcsUid, vscode.ConfigurationTarget.Global);
   }
