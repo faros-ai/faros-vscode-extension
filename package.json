@@ -4,6 +4,7 @@
   "description": "Faros AI's Visual Studio Code extension",
   "version": "0.0.6",
   "publisher": "farosai",
+  "icon": "images/logo.png",
   "engines": {
     "vscode": "^1.90.0"
   },
