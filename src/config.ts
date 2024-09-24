@@ -18,6 +18,7 @@ export interface FarosConfig {
   origin: () => string;
   batchSize: () => number;
   batchInterval: () => number;
+  webhook: () => string;
 }
 
 export const farosConfig: FarosConfig = {
@@ -37,6 +38,7 @@ export const farosConfig: FarosConfig = {
   origin: () => config.get('origin') || 'faros-vscode-extension',
   batchSize: () => config.get('batchSize') || 500,
   batchInterval: () => Number(config.get('batchInterval')) || 60000,
+  webhook: () => config.get('webhook') || '',
 };
 
 export function updateConfig(): void {

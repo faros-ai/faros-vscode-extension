@@ -49,18 +49,36 @@ async function sendToFaros(
   console.log(`Done.`);
 }
 
-export async function send(events: AutoCompletionEvent[]): Promise<void> {
-  const faros = new FarosClient({
-    url: farosConfig.url(),
-    apiKey: farosConfig.apiKey(),
+async function sendToWebhook(
+  webhook: string,
+  batch: Mutation[]
+): Promise<void> {
+  console.log(`Sending...`);
+  await fetch(webhook, {
+    method: "POST",
+    body: JSON.stringify(batch),
   });
+}
+
+export async function send(events: AutoCompletionEvent[]): Promise<void> {
+  let sendFn;
+  if (farosConfig.webhook() === '') {
+    const faros = new FarosClient({
+      url: farosConfig.url(),
+      apiKey: farosConfig.apiKey(),
+    });
+    sendFn = (batch: Mutation[]) => sendToFaros(faros, farosConfig.graph(), batch);
+  }
+  else {
+    sendFn = (batch: Mutation[]) => sendToWebhook(farosConfig.webhook(), batch);
+  }
 
   let batchNum = 1;
   let batch: Mutation[] = [];
   for await (const mutation of mutations(events)) {
     if (batch.length >= farosConfig.batchSize()) {
       console.log(`------ Batch ${batchNum} - Size: ${batch.length} ------`);
-      await sendToFaros(faros, farosConfig.graph(), batch);
+      await sendFn(batch);
       batchNum++;
       batch = [];
     }
@@ -69,6 +87,6 @@ export async function send(events: AutoCompletionEvent[]): Promise<void> {
 
   if (batch.length > 0) {
     console.log(`------ Batch ${batchNum} - Size: ${batch.length} ------`);
-    await sendToFaros(faros, farosConfig.graph(), batch);
+    await sendFn(batch);
   }
 }

@@ -48,6 +48,11 @@
           "default": "https://prod.api.faros.ai",
           "description": "Faros AI endpoint"
         },
+        "faros.webhook": {
+          "type": "string",
+          "default": "",
+          "description": "Faros Webhook URL"
+        },
         "faros.graph": {
           "type": "string",
           "default": "default",
