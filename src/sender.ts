@@ -56,7 +56,10 @@ async function sendToWebhook(
   console.log(`Sending...`);
   await fetch(webhook, {
     method: "POST",
-    body: JSON.stringify(batch),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ query: batchMutation(batch) }),
   });
 }
 
