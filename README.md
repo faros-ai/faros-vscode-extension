@@ -28,10 +28,19 @@ The first major feature of the Faros AI VSCode extension focuses on tracking aut
 
 By deploying this extension to your engineers' machines, Faros will collect data on how often and how effectively auto-completion suggestions are used, offering valuable insights into how these tools are improving productivity and coding speed.
 
-# Installation
-1. Download and install the Faros AI VSCode Extension from the Visual Studio Code Marketplace.
-2. Configure the extension with your Faros AI API key, VCS UID, and VCS Email.
-3. Once installed, the extension will automatically begin collecting auto-completion event data.
+# Installation and Setup
+Download and install the Faros AI VSCode Extension from [the Visual Studio Code Marketplace](https://marketplace.visualstudio.com/items?itemName=FarosAI.faros-vscode-extension) and then configure the extension:
+* Open VSCode setting screen by hitting cmd+,
+* Enter 'Faros' in the search bar to get to Faros AI's extension settings
+* Enter your personal details in the `Vcs Name`, `Vcs Email`, and `Vcs Uid` fields
+* Configure how the extension will send data to Faros in one of two ways:
+  - Set a dedicated webhook url (see more on how to configure a webhook below)
+  - Set Faros API Key that the extension will use to directly post requests to Faros API
+
+Once installed, the extension will automatically begin collecting auto-completion event data.
+
+## Setting up a dedicated webhook
+In Faros' workflows screen (Data control -> Workflows)...
 
 # How It Works
 Once installed, the VSCode extension integrates seamlessly with your developers' workflow. Auto-completion events are captured and securely sent to the Faros AI platform, where leaders can analyze the data to make informed decisions about engineering performance and tool adoption.
