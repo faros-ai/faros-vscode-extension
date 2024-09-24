@@ -1,0 +1,69 @@
+{
+  "name": "faros-vscode-extension-webhook",
+  "description": "This workflow handles webhook events from the VSCode extension, authenticates with Faros, and sends the data to the Faros API.",
+  "tags": [],
+  "pieces": [
+    "@activepieces/piece-webhook",
+    "@activepieces/piece-http"
+  ],
+  "template": {
+    "displayName": "Faros VSCode Extension Webhook",
+    "trigger": {
+      "name": "trigger",
+      "valid": true,
+      "displayName": "Catch Webhook",
+      "type": "PIECE_TRIGGER",
+      "settings": {
+        "pieceName": "@activepieces/piece-webhook",
+        "pieceVersion": "0.1.5",
+        "pieceType": "OFFICIAL",
+        "packageType": "REGISTRY",
+        "input": {
+          "authType": "none",
+          "authFields": {}
+        },
+        "inputUiInfo": {},
+        "triggerName": "catch_webhook"
+      },
+      "nextAction": {
+        "name": "step_1",
+        "type": "PIECE",
+        "valid": true,
+        "settings": {
+          "input": {
+            "url": "https://prod.api.faros.ai/graphs/default/graphql",
+            "body": {
+              "data": "{{trigger['body']}}"
+            },
+            "method": "POST",
+            "headers": {
+              "authorization": "<KEY>"
+            },
+            "failsafe": false,
+            "body_type": "json",
+            "use_proxy": false,
+            "queryParams": {},
+            "proxy_settings": {}
+          },
+          "pieceName": "@activepieces/piece-http",
+          "pieceType": "OFFICIAL",
+          "actionName": "send_request",
+          "inputUiInfo": {},
+          "packageType": "REGISTRY",
+          "pieceVersion": "0.5.1",
+          "errorHandlingOptions": {
+            "retryOnFailure": {
+              "value": false
+            },
+            "continueOnFailure": {
+              "value": false
+            }
+          }
+        },
+        "displayName": "Send HTTP request"
+      }
+    },
+    "valid": true
+  },
+  "blogUrl": ""
+}
