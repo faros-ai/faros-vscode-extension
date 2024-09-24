@@ -40,7 +40,8 @@ Download and install the Faros AI VSCode Extension from [the Visual Studio Code 
 Once installed, the extension will automatically begin collecting auto-completion event data.
 
 ## Setting up a dedicated webhook
-In Faros' workflows screen (Data control -> Workflows)...
+In Faros' workflows screen (Data control -> Workflows) create a new flow by importing [this](https://github.com/faros-ai/faros-vscode-extension/blob/3e24a2e263c26f6dc9c63c9d9155eb5845a66060/activepieces-flow.json) template json file. 
+Once imported, edit the `Send HTTP request` step and update its `authorization` header's value to be your Faros API key. Publish your flow and use its `Catch Webhook` live URL in your extension's webhook configuration.
 
 # How It Works
 Once installed, the VSCode extension integrates seamlessly with your developers' workflow. Auto-completion events are captured and securely sent to the Faros AI platform, where leaders can analyze the data to make informed decisions about engineering performance and tool adoption.
