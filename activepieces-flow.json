@@ -27,30 +27,18 @@
       },
       "nextAction": {
         "name": "step_1",
-        "type": "PIECE",
+        "displayName": "Ensure permitted mutations",
+        "type": "CODE",
         "valid": true,
         "settings": {
           "input": {
-            "url": "https://prod.api.faros.ai/graphs/default/graphql",
-            "body": {
-              "data": "{{trigger['body']}}"
-            },
-            "method": "POST",
-            "headers": {
-              "authorization": "<KEY>"
-            },
-            "failsafe": false,
-            "body_type": "json",
-            "use_proxy": false,
-            "queryParams": {},
-            "proxy_settings": {}
+            "body": "{{trigger['body']}}"
           },
-          "pieceName": "@activepieces/piece-http",
-          "pieceType": "OFFICIAL",
-          "actionName": "send_request",
+          "sourceCode": {
+            "code": "export const code = async (inputs) => {\n    const input = inputs.body.query;\n  \n     // Define the list of permitted mutations\n    const permittedMutations = [\n        'insert_vcs_User_one',\n        'insert_vcs_UserTool_one',\n        'insert_vcs_UserToolUsage_one',\n        'update_columns'\n    ];\n\n    // Regular expression to match any mutation starting with insert_, update_, or delete_\n    const mutationRegex = /\\b(insert_|update_|delete_)\\w+/g;\n\n    // Find all mutations in the input string\n    const mutations = input.match(mutationRegex);\n\n    // If no mutations are found, return true (no unpermitted mutation)\n    if (!mutations) {\n        return true; // No mutation found, hence no unpermitted mutation\n    }\n\n    // Check if all mutations found are in the permitted list\n    const hasUnpermittedMutation = mutations.some(mutation => !permittedMutations.includes(mutation));\n\n    if (hasUnpermittedMutation) {\n      throw new Error(\"Unpermitted mutation identified\");\n    }\n\n    return true;\n};",
+            "packageJson": "{}"
+          },
           "inputUiInfo": {},
-          "packageType": "REGISTRY",
-          "pieceVersion": "0.5.1",
           "errorHandlingOptions": {
             "retryOnFailure": {
               "value": false
@@ -60,7 +48,43 @@
             }
           }
         },
-        "displayName": "Send HTTP request"
+        "nextAction": {
+          "name": "step_2",
+          "displayName": "Update graph",
+          "type": "PIECE",
+          "valid": true,
+          "settings": {
+            "input": {
+              "url": "https://prod.api.faros.ai/graphs/default/graphql",
+              "body": {
+                "data": "{{trigger['body']}}"
+              },
+              "method": "POST",
+              "headers": {
+                "authorization": "<KEY>"
+              },
+              "failsafe": false,
+              "body_type": "json",
+              "use_proxy": false,
+              "queryParams": {},
+              "proxy_settings": {}
+            },
+            "pieceName": "@activepieces/piece-http",
+            "pieceType": "OFFICIAL",
+            "actionName": "send_request",
+            "inputUiInfo": {},
+            "packageType": "REGISTRY",
+            "pieceVersion": "0.5.1",
+            "errorHandlingOptions": {
+              "retryOnFailure": {
+                "value": false
+              },
+              "continueOnFailure": {
+                "value": false
+              }
+            }
+          }
+        }
       }
     },
     "valid": true
