@@ -1,32 +1,25 @@
-# Function to uninstall extension
-uninstall_legacy_extension() {
-    local cmd=$1
-    if $cmd --list-extensions | grep -q "undefined_publisher.faros-vscode-extension"; then
-        echo "Uninstalling Faros legacy extension from $cmd..."
-        $cmd --uninstall-extension undefined_publisher.faros-vscode-extension
-    else
-        echo "Faros legacy extension not found in $cmd."
-    fi
+#!/bin/bash
+user=$(dscl . list /Users | grep -v '_' | grep -v 'ripplingadmin' | grep -v 'nobody' | grep -v 'root' | grep -v 'daemon')
+extension_config_file_path="/Users/$user/.vscode/extensions/farosai"
+extension_config_file_name=".config.json"
+
+# Create extension config file if it doesn't exist
+sudo -u $user mkdir -m 755 -p $extension_config_file_path
+sudo -u $user touch "$extension_config_file_path/$extension_config_file_name"
+cat > "$extension_config_file_path/$extension_config_file_name" << EOF
+{
+  "webhook": "https://ap.prod.workflows.faros.ai/api/v1/webhooks/..."
 }
+EOF
 
-# VSCode
-if command -v /usr/local/bin/code &> /dev/null; then
-    uninstall_legacy_extension "/usr/local/bin/code"
-    echo "Installing official Faros extension..."
-    /usr/local/bin/code --install-extension FarosAI.faros-vscode-extension
-    echo "Updating extensions..."
-    /usr/local/bin/code --update-extensions
-else
-    echo "VSCode not found."
-fi
+# Uninstall legacyextension
+sudo -u $user /usr/local/bin/code --uninstall-extension undefined_publisher.faros-vscode-extension || true
+sudo -u $user /usr/local/bin/cursor --uninstall-extension undefined_publisher.faros-vscode-extension || true
 
-# Cursor
-if command -v /usr/local/bin/cursor &> /dev/null; then
-    uninstall_legacy_extension "/usr/local/bin/cursor"
-    echo "Installing official Faros extension..."
-    /usr/local/bin/cursor --install-extension FarosAI.faros-vscode-extension
-    echo "Updating extensions..."
-    /usr/local/bin/cursor --update-extensions
-else
-    echo "Cursor not found."
-fi
+# Install marketplace extension
+sudo -u $user /usr/local/bin/code --install-extension FarosAI.faros-vscode-extension || true
+sudo -u $user /usr/local/bin/cursor --install-extension FarosAI.faros-vscode-extension || true
+
+# Update extensions
+sudo -u $user /usr/local/bin/code --update-extensions || true
+sudo -u $user /usr/local/bin/cursor --update-extensions || true
