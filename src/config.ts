@@ -42,12 +42,13 @@ export const farosConfig: FarosConfig = {
 };
 
 export function updateConfig(): void {
-  const configPath = path.join(process.env.HOME || process.env.USERPROFILE || '', '.vscode', 'extensions', 'faros', '.config.json');
+  const configPath = path.join(process.env.HOME || process.env.USERPROFILE || '', '.vscode', 'extensions', 'farosai', '.config.json');
 
   if (fs.existsSync(configPath)) {
     try {
       const fileConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
       Object.entries(fileConfig).forEach(([key, value]) => {
+        console.log('Updating config:', key, value);
         config.update(key, value, vscode.ConfigurationTarget.Global);
       });
     } catch (error) {
