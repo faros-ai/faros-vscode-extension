@@ -32,7 +32,7 @@ async function* mutations(
 
   for (const event of events) {
     const vcs_UserToolUsage = {
-      usedAt: event.timestamp.toISOString(),
+      usedAt: event.timestamp instanceof Date ? event.timestamp.toISOString() : event.timestamp,
       userTool: qb.ref({ vcs_UserTool }),
     };
     yield qb.upsert({ vcs_UserToolUsage });

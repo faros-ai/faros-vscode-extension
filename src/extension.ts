@@ -4,6 +4,7 @@ import * as vscode from "vscode";
 import { AutoCompletionEvent } from "./types";
 import { send } from "./sender";
 import { farosConfig, updateConfig } from "./config";
+import { addAutoCompletionEvent, clearAutoCompletionEvents, getAutoCompletionEvents, setContext } from "./state";
 
 let statusBarItem: vscode.StatusBarItem;
 let ev: vscode.Disposable | null = null;
@@ -11,15 +12,13 @@ let suggestionsCount = 0;
 let charCount = 0;
 let previousText = "";
 
-let autocompletionEvents: AutoCompletionEvent[] = [];
-
 // Function to check and log events every minute
 function checkAndLogEvents() {
-  if (autocompletionEvents.length > 0) {
-    console.log("Sending autocompletion events:", autocompletionEvents);
-	send(autocompletionEvents);
+  if (getAutoCompletionEvents().length > 0) {
+    console.log("Sending autocompletion events:", getAutoCompletionEvents());
+    send(getAutoCompletionEvents());
     // Clear the events after logging
-    autocompletionEvents = [];
+    clearAutoCompletionEvents();
   }
 }
 
@@ -68,7 +67,7 @@ function registerSuggestionListener() {
               " chars)";
 
             // Store the event in memory
-            autocompletionEvents.push({
+            addAutoCompletionEvent({
               timestamp: new Date(),
               charCountChange: currentLengthChange,
               fileName: activeEditor.document.fileName,
@@ -87,6 +86,7 @@ export function activate(context: vscode.ExtensionContext) {
   // Use the console to output diagnostic information (console.log) and errors (console.error)
   // This line of code will only be executed once when your extension is activated
   console.log("Faros VSCode extension is now active!");
+  setContext(context);
   updateConfig();
   registerSuggestionListener();
 }
