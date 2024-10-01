@@ -5,6 +5,8 @@ import { AutoCompletionEvent } from "./types";
 import { send } from "./sender";
 import { farosConfig, updateConfig } from "./config";
 import { addAutoCompletionEvent, clearAutoCompletionEvents, getAutoCompletionEvents, setContext } from "./state";
+import { getGitBranch, getGitRepoName } from "./git";
+import path from "path";
 
 let statusBarItem: vscode.StatusBarItem;
 let ev: vscode.Disposable | null = null;
@@ -70,7 +72,11 @@ function registerSuggestionListener() {
             addAutoCompletionEvent({
               timestamp: new Date(),
               charCountChange: currentLengthChange,
-              fileName: activeEditor.document.fileName,
+              filename: activeEditor.document.fileName,
+              extension: path.extname(activeEditor.document.fileName),
+              language: activeEditor.document.languageId,
+              repository: getGitRepoName(activeEditor.document.fileName),
+              branch: getGitBranch(activeEditor.document.fileName),
             });
           }
         }

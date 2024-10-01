@@ -15,6 +15,7 @@ export const getAutoCompletionEvents = (): AutoCompletionEvent[] => {
 };
 
 export const addAutoCompletionEvent = (event: AutoCompletionEvent) => {
+    console.log('Adding auto-completion event:', event);
     const events: AutoCompletionEvent[] = getAutoCompletionEvents();
     events.push(event);
     context.globalState.update(AUTOCOMPLETION_EVENTS_KEY, events);

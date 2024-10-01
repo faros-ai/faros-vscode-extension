@@ -89,8 +89,6 @@
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/git-user-email": "^0.2.2",
-    "@types/git-user-name": "^2.0.3",
     "@types/mocha": "^10.0.6",
     "@types/node": "18.x",
     "@types/vscode": "^1.82.0",
@@ -106,8 +104,6 @@
   },
   "dependencies": {
     "@vscode/vsce": "^3.1.0",
-    "faros-js-client": "^0.5.2",
-    "git-user-email": "^0.2.2",
-    "git-user-name": "^2.0.0"
+    "faros-js-client": "^0.5.2"
   }
 }

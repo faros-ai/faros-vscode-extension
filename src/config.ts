@@ -4,9 +4,8 @@ const config = vscode.workspace.getConfiguration('faros');
 
 import * as fs from 'fs';
 import * as path from 'path';
-import gitUserName from "git-user-name";
-import gitUserEmail from "git-user-email";
 import { createHash, randomUUID } from "crypto";
+import { getGitUserEmail, getGitUserName } from "./git";
 
 export interface FarosConfig {
   apiKey: () => string;
@@ -56,10 +55,10 @@ export function updateConfig(): void {
     }
   }
   if (farosConfig.vcsName() === '') {
-    config.update('vcsName', gitUserName() || '', vscode.ConfigurationTarget.Global);
+    config.update('vcsName', getGitUserName() || '', vscode.ConfigurationTarget.Global);
   }
   if (farosConfig.vcsEmail() === '') {
-    config.update('vcsEmail', gitUserEmail() || '', vscode.ConfigurationTarget.Global);
+    config.update('vcsEmail', getGitUserEmail() || '', vscode.ConfigurationTarget.Global);
   }
   if (farosConfig.vcsUid(false) === '') {
     const hash = createHash('sha256');
