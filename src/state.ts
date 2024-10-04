@@ -21,7 +21,7 @@ export const addAutoCompletionEvent = (event: AutoCompletionEvent) => {
     context.globalState.update(AUTOCOMPLETION_EVENTS_KEY, events);
 };
 
-const getAutoCompletionEventsHistory = (): AutoCompletionEvent[] => {
+export const getAutoCompletionEventsHistory = (): AutoCompletionEvent[] => {
     return context.globalState.get(AUTOCOMPLETION_EVENTS_HISTORY_KEY, []);
 };
 

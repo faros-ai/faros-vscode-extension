@@ -1,5 +1,6 @@
 
 import * as vscode from "vscode";
+import { calculateAutoCompletionStats, getTopRepositories } from "./stats";
 
 export class FarosViewProvider implements vscode.WebviewViewProvider {
 
@@ -33,7 +34,10 @@ export class FarosViewProvider implements vscode.WebviewViewProvider {
 	private _getHtmlForWebview(webview: vscode.Webview) {
 		// Use a nonce to only allow a specific script to be run.
 		const nonce = getNonce();
-
+		const stats = calculateAutoCompletionStats();
+		const topRepositories = getTopRepositories(5);
+		const topRepositoriesHtml = topRepositories.map(repo => `<div>${repo.repository}: ${repo.count}</div>`).join('');
+		
 		return `<!DOCTYPE html>
 			<html lang="en">
 			<head>
@@ -45,7 +49,18 @@ export class FarosViewProvider implements vscode.WebviewViewProvider {
 				<title>Faros AI</title>
 			</head>
 			<body>
-                <div id="root">Hello World !!!</div>
+                <div>Auto-completion events</div>
+				<div>Today: ${stats.today.count}</div>
+				<div>This week: ${stats.thisWeek.count}</div>
+				<div>This month: ${stats.thisMonth.count}</div>
+				<br />
+				<div>Time saved</div>
+				<div>Today: ${stats.today.timeSaved}</div>
+				<div>This week: ${stats.thisWeek.timeSaved}</div>
+				<div>This month: ${stats.thisMonth.timeSaved}</div>
+				<br />
+				<div>Top repositories</div>
+				${topRepositoriesHtml}
 			</body>
 			</html>`;
 	}
