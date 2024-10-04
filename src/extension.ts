@@ -7,6 +7,7 @@ import { farosConfig, updateConfig } from "./config";
 import { addAutoCompletionEvent, clearAutoCompletionEvents, getAutoCompletionEvents, setContext } from "./state";
 import { getGitBranch, getGitRepoName } from "./git";
 import path from "path";
+import { FarosViewProvider } from "./view";
 
 let statusBarItem: vscode.StatusBarItem;
 let ev: vscode.Disposable | null = null;
@@ -95,9 +96,18 @@ export function activate(context: vscode.ExtensionContext) {
   setContext(context);
   updateConfig();
   registerSuggestionListener();
+
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(
+      FarosViewProvider.viewType,
+      new FarosViewProvider(context.extensionUri)
+    )
+  );
 }
 
 // This method is called when your extension is deactivated
 export function deactivate() {
   console.log("Faros VSCode extension is now inactive!");
 }
+
+

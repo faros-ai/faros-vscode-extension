@@ -20,6 +20,25 @@
   },
   "main": "./dist/extension.js",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "webview",
+          "title": "Faros AI",
+          "icon": "images/logo.png"
+        }
+      ]
+    },
+    "views": {
+      "webview": [
+        {
+          "type": "webview",
+          "id": "farosView",
+          "name": "Faros AI",
+          "icon": "images/logo.png"
+        }
+      ]
+    },
     "configuration": {
       "title": "Faros AI",
       "properties": {
