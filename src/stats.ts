@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { AutoCompletionEvent } from './types';
-import { getAutoCompletionEvents, getAutoCompletionEventsHistory } from './state';
+import { AutoCompletionEvent, HourlyAggregate } from './types';
+import { getAutoCompletionEvents, getAutoCompletionHistory } from './state';
 
 export const calculateAutoCompletionStats = (): {
     today: { count: number, timeSaved: number },
@@ -8,34 +8,35 @@ export const calculateAutoCompletionStats = (): {
     thisMonth: { count: number, timeSaved: number }
 } => {
     const CHARS_PER_MINUTE = 300;
-    const events: AutoCompletionEvent[] = [...getAutoCompletionEvents(), ...getAutoCompletionEventsHistory()];
+    
+    const history = getAutoCompletionHistory();
     const now = new Date();
 
-    const today = events.reduce((acc, event) => {
-        if (isSameDay(new Date(event.timestamp), now)) {
+    const today = Array.from(history.values()).reduce((acc, aggregate) => {
+        if (isSameDay(new Date(aggregate.hour), now)) {
             return {
                 count: acc.count + 1,
-                timeSaved: acc.timeSaved + (event.charCountChange / CHARS_PER_MINUTE)
+                timeSaved: acc.timeSaved + (aggregate.charCount / CHARS_PER_MINUTE)
             };
         }
         return acc;
     }, { count: 0, timeSaved: 0 });
 
-    const thisWeek = events.reduce((acc, event) => {
-        if (isThisWeek(new Date(event.timestamp), now)) {
+    const thisWeek = Array.from(history.values()).reduce((acc, aggregate) => {
+        if (isThisWeek(new Date(aggregate.hour), now)) {
             return {
                 count: acc.count + 1,
-                timeSaved: acc.timeSaved + (event.charCountChange / CHARS_PER_MINUTE)
+                timeSaved: acc.timeSaved + (aggregate.charCount / CHARS_PER_MINUTE)
             };
         }
         return acc;
     }, { count: 0, timeSaved: 0 });
 
-    const thisMonth = events.reduce((acc, event) => {
-        if (isSameMonth(new Date(event.timestamp), now)) {
+    const thisMonth = Array.from(history.values()).reduce((acc, aggregate) => {
+        if (isSameMonth(new Date(aggregate.hour), now)) {
             return {
                 count: acc.count + 1,
-                timeSaved: acc.timeSaved + (event.charCountChange / CHARS_PER_MINUTE)
+                timeSaved: acc.timeSaved + (aggregate.charCount / CHARS_PER_MINUTE)
             };
         }
         return acc;
@@ -62,10 +63,12 @@ const isSameMonth = (date1: Date, date2: Date): boolean => {
 };
 
 export const getTopRepositories = (limit: number = 5): { repository: string; count: number }[] => {
-    const events: AutoCompletionEvent[] = [...getAutoCompletionEvents(), ...getAutoCompletionEventsHistory()];
-    const repositoryCounts = events.reduce((acc, event) => {
-        if (event.repository) {
-            acc[event.repository] = (acc[event.repository] || 0) + 1;
+    const history = getAutoCompletionHistory();
+    const repositoryCounts = Array.from(history.values()).reduce((acc, aggregate) => {
+        if (aggregate.repository) {
+            aggregate.repository.forEach(repo => {
+                acc[repo] = (acc[repo] || 0) + 1;
+            });
         }
         return acc;
     }, {} as { [key: string]: number });
