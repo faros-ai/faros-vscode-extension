@@ -1,10 +1,9 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
-import { AutoCompletionEvent } from "./types";
 import { send } from "./sender";
 import { farosConfig, updateConfig } from "./config";
-import { addAutoCompletionEvent, clearAutoCompletionEvents, getAutoCompletionEvents, setContext } from "./state";
+import { addAutoCompletionEvent, clearAutoCompletionEventQueue, getAutoCompletionEventQueue, setContext } from "./state";
 import { getGitBranch, getGitRepoName } from "./git";
 import path from "path";
 import { FarosViewProvider } from "./view";
@@ -17,11 +16,11 @@ let previousText = "";
 
 // Function to check and log events every minute
 function checkAndLogEvents() {
-  if (getAutoCompletionEvents().length > 0) {
-    console.log("Sending autocompletion events:", getAutoCompletionEvents());
-    send(getAutoCompletionEvents());
+  if (getAutoCompletionEventQueue().length > 0) {
+    console.log("Sending autocompletion events:", getAutoCompletionEventQueue());
+    send(getAutoCompletionEventQueue());
     // Clear the events after logging
-    clearAutoCompletionEvents();
+    clearAutoCompletionEventQueue();
   }
 }
 

@@ -12,10 +12,10 @@ export type HourlyAggregate = {
     hour: number;
     eventCount: number;
     charCount: number;
-    filename: Set<string>;
-    extension: Set<string>;
-    language: Set<string>;
-    repository: Set<string>;
-    branch: Set<string>;
+    filename: Array<string>;
+    extension: Array<string>;
+    language: Array<string>;
+    repository: Array<string>;
+    branch: Array<string>;
 };
 

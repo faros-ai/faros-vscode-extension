@@ -1,6 +1,5 @@
-import * as vscode from 'vscode';
-import { AutoCompletionEvent, HourlyAggregate } from './types';
-import { getAutoCompletionEvents, getAutoCompletionHistory } from './state';
+import { getAutoCompletionHistory, getAutoCompletionHistoryForRange } from './state';
+import { HourlyAggregate } from './types';
 
 export const calculateAutoCompletionStats = (): {
     today: { count: number, timeSaved: number },
@@ -9,74 +8,49 @@ export const calculateAutoCompletionStats = (): {
 } => {
     const CHARS_PER_MINUTE = 300;
     
-    const history = getAutoCompletionHistory();
     const now = new Date();
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    const today = Array.from(history.values()).reduce((acc, aggregate) => {
-        if (isSameDay(new Date(aggregate.hour), now)) {
+    const todayHistory = getAutoCompletionHistoryForRange(startOfDay, now);
+    const weekHistory = getAutoCompletionHistoryForRange(startOfWeek, now);
+    const monthHistory = getAutoCompletionHistoryForRange(startOfMonth, now);
+
+    const calculateStats = (history: Array<HourlyAggregate>) => {
+        return history.reduce((acc, aggregate) => {
             return {
-                count: acc.count + 1,
+                count: acc.count + aggregate.eventCount,
                 timeSaved: acc.timeSaved + (aggregate.charCount / CHARS_PER_MINUTE)
             };
-        }
-        return acc;
-    }, { count: 0, timeSaved: 0 });
+        }, { count: 0, timeSaved: 0 });
+    };
 
-    const thisWeek = Array.from(history.values()).reduce((acc, aggregate) => {
-        if (isThisWeek(new Date(aggregate.hour), now)) {
-            return {
-                count: acc.count + 1,
-                timeSaved: acc.timeSaved + (aggregate.charCount / CHARS_PER_MINUTE)
-            };
-        }
-        return acc;
-    }, { count: 0, timeSaved: 0 });
-
-    const thisMonth = Array.from(history.values()).reduce((acc, aggregate) => {
-        if (isSameMonth(new Date(aggregate.hour), now)) {
-            return {
-                count: acc.count + 1,
-                timeSaved: acc.timeSaved + (aggregate.charCount / CHARS_PER_MINUTE)
-            };
-        }
-        return acc;
-    }, { count: 0, timeSaved: 0 });
+    const today = calculateStats(todayHistory);
+    const thisWeek = calculateStats(weekHistory);
+    const thisMonth = calculateStats(monthHistory);
 
     return { today, thisWeek, thisMonth };
 };
 
-const isSameDay = (date1: Date, date2: Date): boolean => {
-    return date1.getFullYear() === date2.getFullYear() &&
-           date1.getMonth() === date2.getMonth() &&
-           date1.getDate() === date2.getDate();
-};
-
-const isThisWeek = (date: Date, now: Date): boolean => {
-    const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
-    const weekEnd = new Date(weekStart.getTime() + 7 * 24 * 60 * 60 * 1000);
-    return date >= weekStart && date < weekEnd;
-};
-
-const isSameMonth = (date1: Date, date2: Date): boolean => {
-    return date1.getFullYear() === date2.getFullYear() &&
-           date1.getMonth() === date2.getMonth();
-};
-
 export const getTopRepositories = (limit: number = 5): { repository: string; count: number }[] => {
-    const history = getAutoCompletionHistory();
-    const repositoryCounts = Array.from(history.values()).reduce((acc, aggregate) => {
-        if (aggregate.repository) {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const history = getAutoCompletionHistoryForRange(startOfMonth, now);
+            
+    const repositoryCounts: { [key: string]: number } = {};
+    history.forEach(aggregate => {
+        if (Array.isArray(aggregate.repository)) {
             aggregate.repository.forEach(repo => {
-                acc[repo] = (acc[repo] || 0) + 1;
+                repositoryCounts[repo] = (repositoryCounts[repo] || 0) + aggregate.eventCount;
             });
         }
-        return acc;
-    }, {} as { [key: string]: number });
+    });
 
     const sortedRepositories = Object.entries(repositoryCounts)
         .sort(([, countA], [, countB]) => countB - countA)
         .slice(0, limit)
         .map(([repository, count]) => ({ repository, count }));
-
+    
     return sortedRepositories;
 };
