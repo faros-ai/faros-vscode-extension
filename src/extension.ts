@@ -6,7 +6,7 @@ import { farosConfig, updateConfig } from "./config";
 import { addAutoCompletionEvent, clearAutoCompletionEventQueue, getAutoCompletionEventQueue, setContext } from "./state";
 import { getGitBranch, getGitRepoName } from "./git";
 import path from "path";
-import { FarosViewProvider } from "./view";
+import { FarosPanel } from "./panel";
 
 let statusBarItem: vscode.StatusBarItem;
 let ev: vscode.Disposable | null = null;
@@ -98,8 +98,8 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
-      FarosViewProvider.viewType,
-      new FarosViewProvider(context.extensionUri)
+      FarosPanel.viewType,
+      new FarosPanel(context.extensionUri)
     )
   );
 }
