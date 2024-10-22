@@ -5,14 +5,15 @@ import { send } from "./sender";
 import { farosConfig, updateConfig } from "./config";
 import { addAutoCompletionEvent, clearAutoCompletionEventQueue, getAutoCompletionEventQueue, setContext } from "./state";
 import { getGitBranch, getGitRepoName } from "./git";
-import path from "path";
-import { FarosPanel } from "./panel";
+import * as path from "path";
+import FarosPanel from "./panel";
 
 let statusBarItem: vscode.StatusBarItem;
 let ev: vscode.Disposable | null = null;
 let suggestionsCount = 0;
 let charCount = 0;
 let previousText = "";
+let farosPanel: FarosPanel | null = null;
 
 // Function to check and log events every minute
 function checkAndLogEvents() {
@@ -78,6 +79,8 @@ function registerSuggestionListener() {
               repository: getGitRepoName(activeEditor.document.fileName),
               branch: getGitBranch(activeEditor.document.fileName),
             });
+
+            farosPanel?.refresh();
           }
         }
       }
@@ -96,10 +99,11 @@ export function activate(context: vscode.ExtensionContext) {
   updateConfig();
   registerSuggestionListener();
 
+  farosPanel = new FarosPanel(context.extensionUri);
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
       FarosPanel.viewType,
-      new FarosPanel(context.extensionUri)
+      farosPanel
     )
   );
 }

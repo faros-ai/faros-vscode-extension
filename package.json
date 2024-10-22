@@ -18,7 +18,7 @@
     "type": "git",
     "url": "https://github.com/faros-ai/faros-vscode-extension.git"
   },
-  "main": "./dist/extension.js",
+  "main": "./out/extension.js",
   "contributes": {
     "viewsContainers": {
       "activitybar": [
@@ -33,7 +33,7 @@
       "webview": [
         {
           "type": "webview",
-          "id": "farosView",
+          "id": "farosPanel",
           "name": "Faros AI",
           "icon": "images/faros-ai-black.png"
         }
@@ -109,11 +109,10 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run package",
-    "compile": "webpack",
+    "vscode:prepublish": "npm run compile",
+    "compile": "webpack --mode production",
     "watch": "webpack --watch",
-    "package": "webpack --mode production --devtool hidden-source-map",
-    "vsce": "vsce package",
+    "package": "vsce package",
     "publish": "vsce publish",
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
@@ -122,18 +121,25 @@
     "test": "jest && vscode-test"
   },
   "devDependencies": {
+    "@babel/core": "^7.25.8",
+    "@babel/preset-react": "^7.25.7",
     "@types/jest": "^29.5.13",
-    "@types/node": "18.x",
+    "@types/node": "^18.19.57",
+    "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.1",
-    "@types/vscode": "^1.82.0",
+    "@types/vscode": "^1.94.0",
+    "@types/webpack": "^5.28.5",
     "@typescript-eslint/eslint-plugin": "^6.13.1",
     "@typescript-eslint/parser": "^6.13.1",
     "@vscode/test-cli": "^0.0.4",
     "@vscode/test-electron": "^2.3.8",
+    "babel-loader": "^9.2.1",
+    "copy-webpack-plugin": "^12.0.2",
     "eslint": "^8.54.0",
     "jest": "^29.7.0",
     "ts-jest": "^29.2.5",
     "ts-loader": "^9.5.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5.6.3",
     "webpack": "^5.89.0",
     "webpack-cli": "^5.1.4"
@@ -142,7 +148,6 @@
     "@chakra-ui/react": "^2.10.3",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
-    "@types/react": "^18.3.11",
     "@vscode/vsce": "^3.1.0",
     "faros-js-client": "^0.5.2",
     "framer-motion": "^11.11.9",

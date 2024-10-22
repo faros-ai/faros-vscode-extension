@@ -1,8 +1,7 @@
-import { renderToString } from "react-dom/server";
-import App from "./components/App";
+const React = require('react');
+const ReactDOM = require('react-dom');
 
-const render = () => {
-  return renderToString(App());
-};
+// Component import
+import App from './components/App';
 
-export default render;
+ReactDOM.render(<App />, document.getElementById('root') as HTMLElement);

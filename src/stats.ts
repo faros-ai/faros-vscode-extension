@@ -1,4 +1,4 @@
-import { getAutoCompletionHistory, getAutoCompletionHistoryForRange } from './state';
+import { getAutoCompletionHistoryForRange } from './state';
 import { HourlyAggregate } from './types';
 
 export const calculateAutoCompletionStats = (): {

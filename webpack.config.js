@@ -1,44 +1,37 @@
-//@ts-check
-
-'use strict';
-
 const path = require('path');
 
-//@ts-check
-/** @typedef {import('webpack').Configuration} WebpackConfig **/
-
-/** @type WebpackConfig */
-const extensionConfig = {
-  target: 'node', // VS Code extensions run in a Node.js-context 📖 -> https://webpack.js.org/configuration/node/
-	mode: 'none', // this leaves the source code as close as possible to the original (when packaging we set this to 'production')
-
-  entry: './src/extension.ts', // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
+const extConfig = {
+  target: 'node',
+  entry: './src/extension.ts',
   output: {
-    // the bundle is stored in the 'dist' folder (check package.json), 📖 -> https://webpack.js.org/configuration/output/
-    path: path.resolve(__dirname, 'dist'),
     filename: 'extension.js',
-    libraryTarget: 'commonjs2'
+    libraryTarget: 'commonjs2',
+    path: path.resolve(__dirname, 'out'),
   },
-  externals: {
-    vscode: 'commonjs vscode' // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
-    // modules added here also need to be added in the .vscodeignore file
+  resolve: { extensions: ['.ts', '.js'] },
+  module: { rules: [{ test: /\.ts$/, loader: 'ts-loader' }] },
+  externals: { vscode: 'vscode' },
+};
+
+const webviewConfig = {
+  target: 'web',
+  entry: './src/webview/index.tsx',
+  output: {
+    filename: '[name].wv.js',
+    path: path.resolve(__dirname, 'out'),
   },
   resolve: {
-    // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
-    extensions: ['.tsx', '.ts', '.js']
+    extensions: ['.js', '.ts', '.tsx'],
   },
   module: {
     rules: [
+      { test: /\.tsx?$/, use: ['babel-loader', 'ts-loader'] },
       {
-        test: /\.tsx?$/,
-        use: 'ts-loader',
-        exclude: /node_modules/,
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader'],
       },
     ],
   },
-  devtool: 'nosources-source-map',
-  infrastructureLogging: {
-    level: "log", // enables logging required for problem matchers
-  },
 };
-module.exports = [ extensionConfig ];
+
+module.exports = [webviewConfig, extConfig];
