@@ -1,4 +1,3 @@
-import { ChakraProvider, Text } from "@chakra-ui/react";
 import * as React from "react";
 
 const App = () => {
@@ -33,34 +32,28 @@ const App = () => {
       }
     });
   });
-
   return (
-    <ChakraProvider>
-      <Text fontSize="xl">Auto-completion events</Text>
-      <Text>
-        Today: {stats.today.count} ({stats.today.timeSaved.toFixed(2)} min
-        saved)
-      </Text>
-      <Text>
-        This week: {stats.thisWeek.count} ({stats.thisWeek.timeSaved.toFixed(2)}{" "}
-        min saved)
-      </Text>
-      <Text>
-        This month: {stats.thisMonth.count} (
-        {stats.thisMonth.timeSaved.toFixed(2)} min saved)
-      </Text>
+    <>
+      <div style={{ fontSize: 'large' }}>Auto-completion events</div>
+      <ul>
+        <li>Today: {stats.today.count} ({stats.today.timeSaved.toFixed(2)} min saved)</li>
+        <li>This week: {stats.thisWeek.count} ({stats.thisWeek.timeSaved.toFixed(2)} min saved)</li>
+        <li>This month: {stats.thisMonth.count} ({stats.thisMonth.timeSaved.toFixed(2)} min saved)</li>
+      </ul>
       <br />
-      <Text fontSize="lg">Top repositories</Text>
+      <div style={{ fontSize: 'large' }}>Top repositories</div>
       {topRepositories.length > 0 ? (
-        topRepositories.map((repo) => (
-          <Text key={repo.repository}>
-            {repo.repository}: {repo.count}
-          </Text>
-        ))
+        <ul>
+          {topRepositories.map((repo) => (
+            <li key={repo.repository}>
+              {repo.repository}: {repo.count}
+            </li>
+          ))}
+        </ul>
       ) : (
-        <Text>N/A</Text>
+        <div>N/A</div>
       )}
-    </ChakraProvider>
+      </>
   );
 };
 
