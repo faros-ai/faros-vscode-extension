@@ -106,6 +106,9 @@ export function activate(context: vscode.ExtensionContext) {
       farosPanel
     )
   );
+
+  // Set context as a global as some tests depend on it
+  (global as any).testExtensionContext = context;
 }
 
 // This method is called when your extension is deactivated

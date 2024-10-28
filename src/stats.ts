@@ -1,13 +1,13 @@
 import { getAutoCompletionHistoryForRange } from './state';
 import { HourlyAggregate } from './types';
 
+export const CHARS_PER_MINUTE = 300;
+
 export const calculateAutoCompletionStats = (): {
     today: { count: number, timeSaved: number },
     thisWeek: { count: number, timeSaved: number },
     thisMonth: { count: number, timeSaved: number }
-} => {
-    const CHARS_PER_MINUTE = 300;
-    
+} => {    
     const now = new Date();
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());

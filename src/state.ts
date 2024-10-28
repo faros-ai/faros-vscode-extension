@@ -10,9 +10,7 @@ export const setContext = (c: vscode.ExtensionContext) => {
     context = c;
 };
 
-export const getAutoCompletionEventQueue = (): Array<AutoCompletionEvent> => {
-    return context.globalState.get(AUTOCOMPLETION_EVENTS_KEY, []);
-};
+export const getAutoCompletionEventQueue = (): AutoCompletionEvent[] => context.globalState.get<AutoCompletionEvent[]>(AUTOCOMPLETION_EVENTS_KEY, []);
 
 const hourToKey = (hour: number) => `${AUTOCOMPLETION_HISTORY_PREFIX}${hour}`;
 
