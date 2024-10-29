@@ -1,0 +1,31 @@
+name: Run Unit Tests
+
+on:
+  push:
+    branches: [ main ]
+  release:
+    types:
+    - created
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+      - name: Install dependencies
+        run: npm install
+      - name: Run tests
+        run: xvfb-run -a npm test
+      - name: Publish
+        if: success() && startsWith(github.ref, 'refs/tags/')
+        run: npm run publish
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+      
