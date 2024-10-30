@@ -28,12 +28,38 @@ function checkAndLogEvents() {
 // Set interval to check and log events every minute (60000 milliseconds)
 setInterval(checkAndLogEvents, farosConfig.batchInterval());
 
-function isTabPress(change: vscode.TextDocumentContentChangeEvent): boolean {
-  // return change.text.length > 1 && change.rangeLength !== 0; 
-  // this condition will be true for any document change event that introduces more than
-  // one character into the document. This will capture all auto-completions, but unfortunately
-  // will also capture copy/paste events.
-  return change.text.length > 1;
+export enum TextChangeType {
+  Undo,
+  Redo,
+  NoChange,
+  Deletion,
+  HandwrittenChar,
+  Space,
+  AutoCloseBracket,
+  AutoCompletion,
+  Unknown
+}
+
+export function classifyTextChange(event: vscode.TextDocumentChangeEvent, updatedText: string, previousText: string): TextChangeType {
+  if (event.reason === vscode.TextDocumentChangeReason.Undo) {
+    return TextChangeType.Undo;
+  } else if (event.reason === vscode.TextDocumentChangeReason.Redo) {
+    return TextChangeType.Redo;
+  } else if (event.contentChanges.length === 0) {
+    return TextChangeType.NoChange;
+  } else if (event.contentChanges.length === 1 && event.contentChanges[0].rangeLength > 0 && event.contentChanges[0].text.length === 0) {
+    return TextChangeType.Deletion;
+  } else if (event.contentChanges.length === 1 && event.contentChanges[0].text.length === 1) {
+    return TextChangeType.HandwrittenChar;
+  } else if (event.contentChanges.length > 0 && event.contentChanges.every(change => change.text.length > 0 && change.text.trim().length === 0)) {
+    return TextChangeType.Space;
+  } else if (event.contentChanges.length === 1 && event.contentChanges[0].text.length === 2 && ['()', '[]', '{}', '""', "''", '``'].includes(event.contentChanges[0].text)) {
+    return TextChangeType.AutoCloseBracket;
+  } else if (event.contentChanges.length > 0 && event.contentChanges.some(change => change.text.replace(/\s/g, "").length > 0) && updatedText.length > previousText.length) {
+    return TextChangeType.AutoCompletion;
+  } else {
+    return TextChangeType.Unknown;
+  }
 }
 
 function registerSuggestionListener() {
@@ -53,37 +79,35 @@ function registerSuggestionListener() {
       if (!activeEditor || event.document !== activeEditor.document) {
         return;
       }
-      const change = event.contentChanges[0];
       const updatedText = activeEditor.document.getText();
-      if (updatedText.length > previousText.length) {
-        if (isTabPress(change)) {
-          const currentLengthChange = change.text.replace(/\s/g, "").length;
+      const changeType = classifyTextChange(event, updatedText, previousText);
 
-          if (currentLengthChange > 0) {
-            suggestionsCount++;
-            charCount += currentLengthChange;
-            statusBarItem.text =
-              "Auto-completions: " +
-              suggestionsCount +
-              " (" +
-              charCount +
-              " chars)";
+      if (changeType === TextChangeType.AutoCompletion) {
+        const currentLengthChange = event.contentChanges[0].text.replace(/\s/g, "").length;
 
-            // Store the event in memory
-            addAutoCompletionEvent({
-              timestamp: new Date(),
-              charCountChange: currentLengthChange,
-              filename: activeEditor.document.fileName,
-              extension: path.extname(activeEditor.document.fileName),
-              language: activeEditor.document.languageId,
-              repository: getGitRepoName(activeEditor.document.fileName),
-              branch: getGitBranch(activeEditor.document.fileName),
-            });
+        suggestionsCount++;
+        charCount += currentLengthChange;
+        statusBarItem.text =
+          "Auto-completions: " +
+          suggestionsCount +
+          " (" +
+          charCount +
+          " chars)";
 
-            farosPanel?.refresh();
-          }
-        }
+        // Store the event in memory
+        addAutoCompletionEvent({
+          timestamp: new Date(),
+          charCountChange: currentLengthChange,
+          filename: activeEditor.document.fileName,
+          extension: path.extname(activeEditor.document.fileName),
+          language: activeEditor.document.languageId,
+          repository: getGitRepoName(activeEditor.document.fileName),
+          branch: getGitBranch(activeEditor.document.fileName),
+        });
+
+        farosPanel?.refresh();
       }
+
       previousText = updatedText;
     });
   }
