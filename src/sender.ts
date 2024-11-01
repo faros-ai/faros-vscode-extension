@@ -62,7 +62,7 @@ async function* mutations(
     const vcs_UserToolUsage = {
       usedAt: event.timestamp instanceof Date ? event.timestamp.toISOString() : event.timestamp,
       userTool: qb.ref({ vcs_UserTool }),
-      charactersAdded: event.charCountChange,
+      charactersAdded: event.autoCompletionCharCountChange,
     };
 
     if (vcs_Repository) {

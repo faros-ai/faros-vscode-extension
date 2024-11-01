@@ -1,6 +1,7 @@
-export type AutoCompletionEvent = {
+export type DocumentChangeEvent = {
   timestamp: Date;
-  charCountChange: number;
+  autoCompletionCharCountChange?: number;
+  handWrittenCharCountChange?: number;
   filename?: string;
   extension?: string;
   language?: string;
@@ -8,14 +9,26 @@ export type AutoCompletionEvent = {
   branch?: string;
 };
 
-export type HourlyAggregate = {
-    hour: number;
-    eventCount: number;
-    charCount: number;
-    filename: Array<string>;
-    extension: Array<string>;
-    language: Array<string>;
-    repository: Array<string>;
-    branch: Array<string>;
+export type AutoCompletionEvent = DocumentChangeEvent & {
+  autoCompletionCharCountChange: number;
 };
 
+export type HandWrittenEvent = DocumentChangeEvent & {
+  handWrittenCharCountChange: number;
+};
+
+export type Summarization = {
+  autoCompletionEventCount: number;
+  autoCompletionCharCount: number;
+  handWrittenCharCount: number;
+};
+
+export type HourlyAggregate = {
+  hour: number;
+  totals: Summarization;
+  filenames: { [filename: string]: Summarization };
+  languages: { [language: string]: Summarization };
+  extensions: { [extension: string]: Summarization };
+  repositories: { [repository: string]: Summarization };
+  branches: { [branch: string]: Summarization };
+};

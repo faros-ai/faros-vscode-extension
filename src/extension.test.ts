@@ -57,7 +57,7 @@ suite('Extension Test Suite', () => {
 			}],
 			document: {} as vscode.TextDocument
 		} as vscode.TextDocumentChangeEvent;
-		assert.strictEqual(classifyTextChange(event, "a", ""), TextChangeType.HandwrittenChar);
+		assert.strictEqual(classifyTextChange(event, "a", ""), TextChangeType.HandWrittenChar);
 	});
 
 	test('classifyTextChange - Space', () => {

@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
-import { AutoCompletionEvent, HourlyAggregate } from './types';
+import { AutoCompletionEvent, DocumentChangeEvent, HandWrittenEvent, HourlyAggregate, Summarization } from './types';
 
 const AUTOCOMPLETION_EVENTS_KEY = 'autocompletionEvents';
-const AUTOCOMPLETION_HISTORY_PREFIX = 'autocompletionHistory: ';
+const HOURLY_AGGREGATE_PREFIX = 'aggregate: ';
 
 let context: vscode.ExtensionContext;
 
@@ -12,30 +12,45 @@ export const setContext = (c: vscode.ExtensionContext) => {
 
 export const getAutoCompletionEventQueue = (): AutoCompletionEvent[] => context.globalState.get<AutoCompletionEvent[]>(AUTOCOMPLETION_EVENTS_KEY, []);
 
-const hourToKey = (hour: number) => `${AUTOCOMPLETION_HISTORY_PREFIX}${hour}`;
+const hourToKey = (hour: number) => `${HOURLY_AGGREGATE_PREFIX}${hour}`;
 
-const setAutoCompletionHistory = (hour: number, aggregate: HourlyAggregate) => {
+const setHourlyAggregate = (hour: number, aggregate: HourlyAggregate) => {
     context.globalState.update(hourToKey(hour), aggregate);
 };
 
-export const getAutoCompletionHistory = (hour: number): HourlyAggregate => {
+export const getHourlyAggregate = (hour: number): HourlyAggregate => {
     return context.globalState.get(hourToKey(hour)) as HourlyAggregate;
 };
 
 const dateToHour = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours()).getTime();
 
-export const getAutoCompletionHistoryForRange = (startDate: Date, endDate: Date): Array<HourlyAggregate> => {
+export const getHourlyAggregateForRange = (startDate: Date, endDate: Date): Array<HourlyAggregate> => {
     const history = [];
     let currentDate = new Date(startDate);
     while (currentDate <= endDate) {
         const hour = dateToHour(currentDate);
-        const aggregate = getAutoCompletionHistory(hour);
+        const aggregate = getHourlyAggregate(hour);
         if (aggregate) {
             history.push(aggregate);
         }
         currentDate.setHours(currentDate.getHours() + 1);
     }
     return history;
+};
+
+// Updates the summarization for a given key, creating it if it doesn't exist
+const updateSummarization = (summarization: Summarization | undefined, change: Summarization): Summarization => {
+    const newSummarization = summarization ? { ...summarization } : {
+        autoCompletionEventCount: 0,
+        autoCompletionCharCount: 0,
+        handWrittenCharCount: 0,
+    };
+
+    newSummarization.autoCompletionEventCount += change.autoCompletionEventCount;
+    newSummarization.autoCompletionCharCount += change.autoCompletionCharCount;
+    newSummarization.handWrittenCharCount += change.handWrittenCharCount;
+
+    return newSummarization;
 };
 
 export const addAutoCompletionEvent = (event: AutoCompletionEvent) => {    
@@ -45,39 +60,52 @@ export const addAutoCompletionEvent = (event: AutoCompletionEvent) => {
     context.globalState.update(AUTOCOMPLETION_EVENTS_KEY, queue);
 
     // Add to history
+    addDocumentChangeEvent(event);
+};
+
+export const addHandWrittenEvent = (event: HandWrittenEvent) => {
+    // Add to history
+    addDocumentChangeEvent(event);
+};
+
+const addDocumentChangeEvent = (event: DocumentChangeEvent) => {
     const hour = dateToHour(event.timestamp);
-    const aggregate = getAutoCompletionHistory(hour) || { 
+    const aggregate = getHourlyAggregate(hour) || { 
         hour,
-        eventCount: 0, 
-        charCount: 0, 
-        filename: [], 
-        extension: [], 
-        language: [], 
-        repository: [], 
-        branch: [] 
+        totals: undefined,
+        filenames: {}, 
+        languages: {}, 
+        extensions: {}, 
+        repositories: {}, 
+        branches: {} 
     };
 
-    aggregate.eventCount++;
-    aggregate.charCount += event.charCountChange || 0;
+    const change = {
+        autoCompletionEventCount: event.autoCompletionCharCountChange ? 1 : 0,
+        autoCompletionCharCount: event.autoCompletionCharCountChange || 0,
+        handWrittenCharCount: event.handWrittenCharCountChange || 0,
+    };
 
-    if (event.filename && !aggregate.filename.includes(event.filename)) {
-        aggregate.filename.push(event.filename);
+    aggregate.totals = updateSummarization(aggregate.totals, change);
+
+    if (event.filename) {
+        aggregate.filenames[event.filename] = updateSummarization(aggregate.filenames[event.filename], change);
     }
-    if (event.extension && !aggregate.extension.includes(event.extension)) {
-        aggregate.extension.push(event.extension);
+    if (event.extension) {
+        aggregate.extensions[event.extension] = updateSummarization(aggregate.extensions[event.extension], change);
     }
-    if (event.language && !aggregate.language.includes(event.language)) {
-        aggregate.language.push(event.language);
+    if (event.language) {
+        aggregate.languages[event.language] = updateSummarization(aggregate.languages[event.language], change);
     }
-    if (event.repository && !aggregate.repository.includes(event.repository)) {
-        aggregate.repository.push(event.repository);
+    if (event.repository) {
+        aggregate.repositories[event.repository] = updateSummarization(aggregate.repositories[event.repository], change);
     }
-    if (event.branch && !aggregate.branch.includes(event.branch)) {
-        aggregate.branch.push(event.branch);
+    if (event.branch) {
+        aggregate.branches[event.branch] = updateSummarization(aggregate.branches[event.branch], change);
     }
 
-    setAutoCompletionHistory(hour, aggregate);
-};
+    setHourlyAggregate(hour, aggregate);
+}; 
 
 export const clearAutoCompletionEventQueue = () => {
     context.globalState.update(AUTOCOMPLETION_EVENTS_KEY, []);

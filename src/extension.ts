@@ -3,7 +3,7 @@
 import * as vscode from "vscode";
 import { send } from "./sender";
 import { farosConfig, updateConfig } from "./config";
-import { addAutoCompletionEvent, clearAutoCompletionEventQueue, getAutoCompletionEventQueue, setContext } from "./state";
+import { addAutoCompletionEvent, addHandWrittenEvent, clearAutoCompletionEventQueue, getAutoCompletionEventQueue, setContext } from "./state";
 import { getGitBranch, getGitRepoName } from "./git";
 import * as path from "path";
 import FarosPanel from "./panel";
@@ -33,7 +33,7 @@ export enum TextChangeType {
   Redo,
   NoChange,
   Deletion,
-  HandwrittenChar,
+  HandWrittenChar,
   Space,
   AutoCloseBracket,
   AutoCompletion,
@@ -50,7 +50,7 @@ export function classifyTextChange(event: vscode.TextDocumentChangeEvent, update
   } else if (event.contentChanges.length === 1 && event.contentChanges[0].rangeLength > 0 && event.contentChanges[0].text.length === 0) {
     return TextChangeType.Deletion;
   } else if (event.contentChanges.length === 1 && event.contentChanges[0].text.length === 1) {
-    return TextChangeType.HandwrittenChar;
+    return TextChangeType.HandWrittenChar;
   } else if (event.contentChanges.length > 0 && event.contentChanges.every(change => change.text.length > 0 && change.text.trim().length === 0)) {
     return TextChangeType.Space;
   } else if (event.contentChanges.length === 1 && event.contentChanges[0].text.length === 2 && ['()', '[]', '{}', '""', "''", '``'].includes(event.contentChanges[0].text)) {
@@ -97,7 +97,19 @@ function registerSuggestionListener() {
         // Store the event in memory
         addAutoCompletionEvent({
           timestamp: new Date(),
-          charCountChange: currentLengthChange,
+          autoCompletionCharCountChange: currentLengthChange,
+          filename: activeEditor.document.fileName,
+          extension: path.extname(activeEditor.document.fileName),
+          language: activeEditor.document.languageId,
+          repository: getGitRepoName(activeEditor.document.fileName),
+          branch: getGitBranch(activeEditor.document.fileName),
+        });
+
+        farosPanel?.refresh();
+      } else if (changeType === TextChangeType.HandWrittenChar) {
+        addHandWrittenEvent({
+          timestamp: new Date(),
+          handWrittenCharCountChange: 1,
           filename: activeEditor.document.fileName,
           extension: path.extname(activeEditor.document.fileName),
           language: activeEditor.document.languageId,

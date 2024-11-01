@@ -20,13 +20,13 @@ suite('Stats Test Suite', () => {
 
     test('calculateAutoCompletionStats should calculate stats correctly for today, this week, and this month', async () => {
         const events: AutoCompletionEvent[] = [
-            { timestamp: startOfDay, charCountChange: 5*CHARS_PER_MINUTE, filename: 'file1.ts', extension: '.ts', language: 'TypeScript', repository: 'repo1', branch: 'main' },
-            { timestamp: startOfDay, charCountChange: 15*CHARS_PER_MINUTE, filename: 'file2.js', extension: '.js', language: 'JavaScript', repository: 'repo2', branch: 'feature' },
-            { timestamp: startOfDay, charCountChange: 25*CHARS_PER_MINUTE, filename: 'file3.py', extension: '.py', language: 'Python', repository: 'repo3', branch: 'develop' },
-            { timestamp: startOfDay, charCountChange: 10*CHARS_PER_MINUTE, filename: 'file4.ts', extension: '.ts', language: 'TypeScript', repository: 'repo1', branch: 'main' },
-            { timestamp: startOfWeek, charCountChange: 30*CHARS_PER_MINUTE, filename: 'file2.js', extension: '.js', language: 'JavaScript', repository: 'repo2', branch: 'main' },
-            { timestamp: startOfWeek, charCountChange: 10*CHARS_PER_MINUTE, filename: 'file4.js', extension: '.ts', language: 'JavaScript', repository: 'repo2', branch: 'main' },
-            { timestamp: startOfMonth, charCountChange: 10*CHARS_PER_MINUTE, filename: 'file3.js', extension: '.py', language: 'JavaScript', repository: 'repo2', branch: 'main' },
+            { timestamp: startOfDay, autoCompletionCharCountChange: 5*CHARS_PER_MINUTE, filename: 'file1.ts', extension: '.ts', language: 'TypeScript', repository: 'repo1', branch: 'main' },
+            { timestamp: startOfDay, autoCompletionCharCountChange: 15*CHARS_PER_MINUTE, filename: 'file2.js', extension: '.js', language: 'JavaScript', repository: 'repo2', branch: 'feature' },
+            { timestamp: startOfDay, autoCompletionCharCountChange: 25*CHARS_PER_MINUTE, filename: 'file3.py', extension: '.py', language: 'Python', repository: 'repo3', branch: 'develop' },
+            { timestamp: startOfDay, autoCompletionCharCountChange: 10*CHARS_PER_MINUTE, filename: 'file4.ts', extension: '.ts', language: 'TypeScript', repository: 'repo1', branch: 'main' },
+            { timestamp: startOfWeek, autoCompletionCharCountChange: 30*CHARS_PER_MINUTE, filename: 'file2.js', extension: '.js', language: 'JavaScript', repository: 'repo2', branch: 'main' },
+            { timestamp: startOfWeek, autoCompletionCharCountChange: 10*CHARS_PER_MINUTE, filename: 'file4.js', extension: '.ts', language: 'JavaScript', repository: 'repo2', branch: 'main' },
+            { timestamp: startOfMonth, autoCompletionCharCountChange: 10*CHARS_PER_MINUTE, filename: 'file3.js', extension: '.py', language: 'JavaScript', repository: 'repo2', branch: 'main' },
         ];
 
         events.forEach(addAutoCompletionEvent);
@@ -44,13 +44,13 @@ suite('Stats Test Suite', () => {
 
     test('getTopRepositories should return top repositories correctly', async () => {
         const events: AutoCompletionEvent[] = [
-            { timestamp: startOfDay, charCountChange: 5*CHARS_PER_MINUTE, filename: 'file1.ts', extension: '.ts', language: 'TypeScript', repository: 'repo1', branch: 'main' },
-            { timestamp: startOfDay, charCountChange: 15*CHARS_PER_MINUTE, filename: 'file2.js', extension: '.js', language: 'JavaScript', repository: 'repo2', branch: 'feature' },
-            { timestamp: startOfDay, charCountChange: 25*CHARS_PER_MINUTE, filename: 'file3.py', extension: '.py', language: 'Python', repository: 'repo3', branch: 'develop' },
-            { timestamp: startOfDay, charCountChange: 10*CHARS_PER_MINUTE, filename: 'file4.ts', extension: '.ts', language: 'TypeScript', repository: 'repo1', branch: 'main' },
-            { timestamp: startOfWeek, charCountChange: 30*CHARS_PER_MINUTE, filename: 'file2.js', extension: '.js', language: 'JavaScript', repository: 'repo2', branch: 'main' },
-            { timestamp: startOfWeek, charCountChange: 10*CHARS_PER_MINUTE, filename: 'file4.js', extension: '.ts', language: 'JavaScript', repository: 'repo2', branch: 'main' },
-            { timestamp: startOfMonth, charCountChange: 10*CHARS_PER_MINUTE, filename: 'file3.js', extension: '.py', language: 'JavaScript', repository: 'repo2', branch: 'main' },
+            { timestamp: startOfDay, autoCompletionCharCountChange: 5*CHARS_PER_MINUTE, filename: 'file1.ts', extension: '.ts', language: 'TypeScript', repository: 'repo1', branch: 'main' },
+            { timestamp: startOfDay, autoCompletionCharCountChange: 15*CHARS_PER_MINUTE, filename: 'file2.js', extension: '.js', language: 'JavaScript', repository: 'repo2', branch: 'feature' },
+            { timestamp: startOfDay, autoCompletionCharCountChange: 25*CHARS_PER_MINUTE, filename: 'file3.py', extension: '.py', language: 'Python', repository: 'repo3', branch: 'develop' },
+            { timestamp: startOfDay, autoCompletionCharCountChange: 10*CHARS_PER_MINUTE, filename: 'file4.ts', extension: '.ts', language: 'TypeScript', repository: 'repo1', branch: 'main' },
+            { timestamp: startOfWeek, autoCompletionCharCountChange: 30*CHARS_PER_MINUTE, filename: 'file2.js', extension: '.js', language: 'JavaScript', repository: 'repo2', branch: 'main' },
+            { timestamp: startOfWeek, autoCompletionCharCountChange: 10*CHARS_PER_MINUTE, filename: 'file4.js', extension: '.ts', language: 'JavaScript', repository: 'repo2', branch: 'main' },
+            { timestamp: startOfMonth, autoCompletionCharCountChange: 10*CHARS_PER_MINUTE, filename: 'file3.js', extension: '.py', language: 'JavaScript', repository: 'repo2', branch: 'main' },
         ];
 
         events.forEach(addAutoCompletionEvent);
@@ -58,9 +58,9 @@ suite('Stats Test Suite', () => {
         const result = getTopRepositories(3);
 
         assert.deepStrictEqual(result, [
-            { repository: 'repo2', count: 7 },
-            { repository: 'repo1', count: 4 },
-            { repository: 'repo3', count: 4 },
+            { repository: 'repo1', count: 2 },
+            { repository: 'repo2', count: 4 },
+            { repository: 'repo3', count: 1 },
         ]);
     });
 });

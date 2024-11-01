@@ -19,7 +19,7 @@ suite('State Test Suite', () => {
     test('getAutoCompletionEventQueue should return stored events', () => {
         const event: AutoCompletionEvent = {
             timestamp: new Date(),
-            charCountChange: 10,
+            autoCompletionCharCountChange: 10,
             filename: "test.py",
             extension: "py",
             language: "python",
@@ -34,7 +34,7 @@ suite('State Test Suite', () => {
     test('clearAutoCompletionEventQueue should clear the event queue', () => {
         const event: AutoCompletionEvent = {
             timestamp: new Date(),
-            charCountChange: 10,
+            autoCompletionCharCountChange: 10,
             filename: "test.py",
             extension: "py",
             language: "python",
