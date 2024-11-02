@@ -5,7 +5,7 @@ import { AutoCompletionEvent } from './types';
 import { addAutoCompletionEvent, setContext } from './state';
 import { clearGlobalState } from './util';
 
-const now = new Date();
+const now = new Date(2024, 9, 17);
 const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
 const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -31,7 +31,7 @@ suite('Stats Test Suite', () => {
 
         events.forEach(addAutoCompletionEvent);
 
-        const result = calculateAutoCompletionStats();
+        const result = calculateAutoCompletionStats(now);
 
         assert.deepStrictEqual(result, {
             today: { count: 4, timeSaved: 55 },
@@ -55,11 +55,11 @@ suite('Stats Test Suite', () => {
 
         events.forEach(addAutoCompletionEvent);
 
-        const result = getTopRepositories(3);
+        const result = getTopRepositories(3, now);
 
         assert.deepStrictEqual(result, [
-            { repository: 'repo1', count: 2 },
             { repository: 'repo2', count: 4 },
+            { repository: 'repo1', count: 2 },
             { repository: 'repo3', count: 1 },
         ]);
     });

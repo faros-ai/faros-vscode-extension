@@ -3,12 +3,11 @@ import { HourlyAggregate } from './types';
 
 export const CHARS_PER_MINUTE = 300;
 
-export const calculateAutoCompletionStats = (): {
+export const calculateAutoCompletionStats = (now: Date = new Date()): {
     today: { count: number, timeSaved: number },
     thisWeek: { count: number, timeSaved: number },
     thisMonth: { count: number, timeSaved: number }
 } => {    
-    const now = new Date();
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -33,8 +32,7 @@ export const calculateAutoCompletionStats = (): {
     return { today, thisWeek, thisMonth };
 };
 
-export const getTopRepositories = (limit: number = 5): { repository: string; count: number }[] => {
-    const now = new Date();
+export const getTopRepositories = (limit: number = 5, now: Date = new Date()): { repository: string; count: number }[] => {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const history = getHourlyAggregateForRange(startOfMonth, now);
     

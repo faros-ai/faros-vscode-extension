@@ -26,7 +26,7 @@ const dateToHour = (date: Date) => new Date(date.getFullYear(), date.getMonth(),
 
 export const getHourlyAggregateForRange = (startDate: Date, endDate: Date): Array<HourlyAggregate> => {
     const history = [];
-    let currentDate = new Date(startDate);
+    let currentDate = startDate;
     while (currentDate <= endDate) {
         const hour = dateToHour(currentDate);
         const aggregate = getHourlyAggregate(hour);
