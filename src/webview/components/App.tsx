@@ -20,6 +20,15 @@ const App = () => {
     thisWeek: { count: 0, timeSaved: 0 },
     thisMonth: { count: 0, timeSaved: 0 },
   });
+  const [ratios, setRatios] = React.useState<{
+    today: number;
+    thisWeek: number;
+    thisMonth: number;
+  }>({
+    today: 0,
+    thisWeek: 0,
+    thisMonth: 0,
+  });
   const [topRepositories, setTopRepositories] = React.useState<
     {
       repository: string;
@@ -33,10 +42,12 @@ const App = () => {
       switch (message.command) {
         case "startup":
           setStats(message.stats);
+          setRatios(message.ratios);
           setTopRepositories(message.topRepositories);
           break;
         case "refresh":
           setStats(message.stats);
+          setRatios(message.ratios);
           setTopRepositories(message.topRepositories);
           break;
       }
@@ -44,6 +55,7 @@ const App = () => {
   });
 
   const formatTimeSaved = (timeSaved: number) => timeSaved >= 60 ? (timeSaved / 60).toFixed(2) + " hours" : timeSaved.toFixed(2) + " min";
+  const formatPercentage = (percentage: number) => percentage ? percentage.toFixed(2) + "%" : "N/A";
 
   return (
     <>
@@ -63,6 +75,18 @@ const App = () => {
         </div>
       </div>
 
+      <div style={panelStyle}>
+        <div style={titleStyle}>My Ratios</div>
+        <div style={subtitleStyle}>Percentage of auto-completed code out of the total code written</div>
+        <div style={gridStyle("auto auto")}>
+          <div style={{...gridItemStyle, marginRight: "20px"}}>{calendarDayIcon} Today</div>
+          <div style={{...gridItemStyle, marginRight: "20px"}}>{eventsCountIcon}{formatPercentage(ratios.today)}</div>
+          <div style={{...gridItemStyle, marginRight: "20px"}}>{calendarWeekIcon} This week</div>
+          <div style={{...gridItemStyle, marginRight: "20px"}}>{eventsCountIcon}{formatPercentage(ratios.thisWeek)}</div>
+          <div style={{...gridItemStyle, marginRight: "20px"}}>{calendarMonthIcon} This month</div>
+          <div style={{...gridItemStyle, marginRight: "20px"}}>{eventsCountIcon}{formatPercentage(ratios.thisMonth)}</div>
+        </div>
+      </div>
 
       <div style={panelStyle}>
         <div style={titleStyle}>Top Repositories</div>

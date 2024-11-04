@@ -32,6 +32,39 @@ export const calculateAutoCompletionStats = (now: Date = new Date()): {
     return { today, thisWeek, thisMonth };
 };
 
+export const calculateRatios = (now: Date = new Date()): {
+    today: number,
+    thisWeek: number,
+    thisMonth: number
+} => {
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const todayHistory = getHourlyAggregateForRange(startOfDay, now);
+    const weekHistory = getHourlyAggregateForRange(startOfWeek, now);
+    const monthHistory = getHourlyAggregateForRange(startOfMonth, now);
+
+    const calculateRatios = (history: Array<HourlyAggregate>) => {
+        return history.reduce((acc, aggregate) => {
+            return {
+                autoCompletedChars: acc.autoCompletedChars + aggregate.totals.autoCompletionCharCount,
+                handWrittenChars: acc.handWrittenChars + aggregate.totals.handWrittenCharCount
+            };
+        }, { autoCompletedChars: 0, handWrittenChars: 0 });
+    };
+
+    const today = calculateRatios(todayHistory);
+    const thisWeek = calculateRatios(weekHistory);
+    const thisMonth = calculateRatios(monthHistory);
+
+    return { 
+        today: today.autoCompletedChars / (today.autoCompletedChars + today.handWrittenChars), 
+        thisWeek: thisWeek.autoCompletedChars / (thisWeek.autoCompletedChars + thisWeek.handWrittenChars), 
+        thisMonth: thisMonth.autoCompletedChars / (thisMonth.autoCompletedChars + thisMonth.handWrittenChars) 
+    };
+};
+
 export const getTopRepositories = (limit: number = 5, now: Date = new Date()): { repository: string; count: number }[] => {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const history = getHourlyAggregateForRange(startOfMonth, now);

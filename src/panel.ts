@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { calculateAutoCompletionStats, getTopRepositories } from "./stats";
+import { calculateAutoCompletionStats, calculateRatios, getTopRepositories } from "./stats";
 
 export default class FarosPanel implements vscode.WebviewViewProvider {
   public static readonly viewType = "farosPanel";
@@ -11,11 +11,13 @@ export default class FarosPanel implements vscode.WebviewViewProvider {
 
   public refresh() {
     const stats = calculateAutoCompletionStats();
+    const ratios = calculateRatios();
     const topRepositories = getTopRepositories(5);
 
 	this.webview?.postMessage({
 		command: "refresh",
 		stats,
+		ratios,
 		topRepositories,
 	  });
   }
