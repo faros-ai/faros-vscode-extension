@@ -14,10 +14,12 @@ import {detailsCollapseButtonStyle, detailsGridStyle, gridItemStyle, overviewGri
 
 const App = () => {
   const [stats, setStats] = React.useState<{
+    total: { count: number; timeSaved: number };
     today: { count: number; timeSaved: number };
     thisWeek: { count: number; timeSaved: number };
     thisMonth: { count: number; timeSaved: number };
   }>({
+    total: { count: 0, timeSaved: 0 },
     today: { count: 0, timeSaved: 0 },
     thisWeek: { count: 0, timeSaved: 0 },
     thisMonth: { count: 0, timeSaved: 0 },
@@ -26,7 +28,9 @@ const App = () => {
     today: number;
     thisWeek: number;
     thisMonth: number;
+    total: number;
   }>({
+    total: 0,
     today: 0,
     thisWeek: 0,
     thisMonth: 0,
@@ -73,9 +77,9 @@ const App = () => {
         <div style={titleStyle}>My Stats</div>
         <div style={subtitleStyle}>Overview of my auto-completion usage</div>
         <div style={overviewGridStyle()}>
-          <div style={gridItemStyle()}>{eventsCountIcon}Total Auto-completions</div><div style={gridItemStyle({justifyContent: "flex-end"})}>{stats.thisMonth.count}</div>
-          <div style={gridItemStyle()}>{timeSavedIcon}Time saved</div><div style={gridItemStyle({justifyContent: "flex-end"})}>{formatTimeSaved(stats.thisMonth.timeSaved)}</div>
-          <div style={gridItemStyle()}>{percentageIcon}Auto-completed ratio</div><div style={gridItemStyle({justifyContent: "flex-end"})}>{formatPercentage(ratios.thisMonth)}</div>
+          <div style={gridItemStyle()}>{eventsCountIcon}Total Auto-completions</div><div style={gridItemStyle({justifyContent: "flex-end"})}>{stats.total.count}</div>
+          <div style={gridItemStyle()}>{timeSavedIcon}Time saved</div><div style={gridItemStyle({justifyContent: "flex-end"})}>{formatTimeSaved(stats.total.timeSaved)}</div>
+          <div style={gridItemStyle()}>{percentageIcon}Auto-completed ratio</div><div style={gridItemStyle({justifyContent: "flex-end"})}>{formatPercentage(ratios.total)}</div>
         </div>
         <div style={{display: "flex", alignItems: "center", gap: "4px"}}>
           {chevronIcon(showDetailedBreakdown)}
