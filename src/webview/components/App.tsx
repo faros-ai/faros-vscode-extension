@@ -6,9 +6,11 @@ import {
   eventsCountIcon,
   timeSavedIcon,
   repositoryIcon,
+  percentageIcon,
+  chevronIcon,
 } from "./Icons";
 
-import { gridItemStyle, gridStyle, panelStyle, subtitleStyle, titleStyle } from "./Styles";
+import {detailsCollapseButtonStyle, detailsGridStyle, gridItemStyle, overviewGridStyle, panelStyle, subtitleStyle, titleStyle } from "./Styles";
 
 const App = () => {
   const [stats, setStats] = React.useState<{
@@ -35,6 +37,7 @@ const App = () => {
       count: number;
     }[]
   >([]);
+  const [showDetailedBreakdown, setShowDetailedBreakdown] = React.useState(false);
 
   React.useEffect(() => {
     window.addEventListener("message", (event) => {
@@ -54,52 +57,60 @@ const App = () => {
     });
   });
 
-  const formatTimeSaved = (timeSaved: number) => timeSaved >= 60 ? (timeSaved / 60).toFixed(2) + " hours" : timeSaved.toFixed(2) + " min";
-  const formatPercentage = (percentage: number) => percentage ? percentage.toFixed(2) + "%" : "N/A";
+  const formatTimeSaved = (timeSaved: number) => {
+    const hours = Math.floor(timeSaved / 60);
+    const minutes = Math.round(timeSaved % 60);
+    if (hours === 0) {
+      return `${minutes}m`;
+    }
+    return `${hours}h ${minutes}m`;
+  };
+  const formatPercentage = (percentage: number) => percentage ? (percentage * 100).toFixed(0) + "%" : "N/A";
 
   return (
     <>
       <div style={panelStyle}>
         <div style={titleStyle}>My Stats</div>
-        <div style={subtitleStyle}>Time saved from auto-completion</div>
-        <div style={gridStyle("auto auto auto")}>
-          <div style={{...gridItemStyle, marginRight: "20px"}}>{calendarDayIcon} Today</div>
-          <div style={{...gridItemStyle, marginRight: "20px"}}>{eventsCountIcon}{stats.today.count}</div>
-          <div style={gridItemStyle}>{timeSavedIcon} {formatTimeSaved(stats.today.timeSaved)}</div>
-          <div style={{...gridItemStyle, marginRight: "20px"}}>{calendarWeekIcon} This week</div>
-          <div style={{...gridItemStyle, marginRight: "20px"}}>{eventsCountIcon}{stats.thisWeek.count}</div>
-          <div style={gridItemStyle}>{timeSavedIcon} {formatTimeSaved(stats.thisWeek.timeSaved)}</div>
-          <div style={{...gridItemStyle, marginRight: "20px"}}>{calendarMonthIcon} This month</div>
-          <div style={{...gridItemStyle, marginRight: "20px"}}>{eventsCountIcon}{stats.thisMonth.count}</div>
-          <div style={gridItemStyle}>{timeSavedIcon} {formatTimeSaved(stats.thisMonth.timeSaved)}</div>
+        <div style={subtitleStyle}>Overview of my auto-completion usage</div>
+        <div style={overviewGridStyle()}>
+          <div style={gridItemStyle()}>{eventsCountIcon}Total Auto-completions</div><div style={gridItemStyle({justifyContent: "flex-end"})}>{stats.thisMonth.count}</div>
+          <div style={gridItemStyle()}>{timeSavedIcon}Time saved</div><div style={gridItemStyle({justifyContent: "flex-end"})}>{formatTimeSaved(stats.thisMonth.timeSaved)}</div>
+          <div style={gridItemStyle()}>{percentageIcon}Auto-completed ratio</div><div style={gridItemStyle({justifyContent: "flex-end"})}>{formatPercentage(ratios.thisMonth)}</div>
         </div>
-      </div>
-
-      <div style={panelStyle}>
-        <div style={titleStyle}>My Ratios</div>
-        <div style={subtitleStyle}>Percentage of auto-completed code out of the total code written</div>
-        <div style={gridStyle("auto auto")}>
-          <div style={{...gridItemStyle, marginRight: "20px"}}>{calendarDayIcon} Today</div>
-          <div style={{...gridItemStyle, marginRight: "20px"}}>{eventsCountIcon}{formatPercentage(ratios.today)}</div>
-          <div style={{...gridItemStyle, marginRight: "20px"}}>{calendarWeekIcon} This week</div>
-          <div style={{...gridItemStyle, marginRight: "20px"}}>{eventsCountIcon}{formatPercentage(ratios.thisWeek)}</div>
-          <div style={{...gridItemStyle, marginRight: "20px"}}>{calendarMonthIcon} This month</div>
-          <div style={{...gridItemStyle, marginRight: "20px"}}>{eventsCountIcon}{formatPercentage(ratios.thisMonth)}</div>
+        <div style={{display: "flex", alignItems: "center", gap: "4px"}}>
+          {chevronIcon(showDetailedBreakdown)}
+          <a style={detailsCollapseButtonStyle} onClick={() => setShowDetailedBreakdown(!showDetailedBreakdown)}>Detailed Breakdown</a>
         </div>
+        {showDetailedBreakdown && (
+          <div style={detailsGridStyle()}>
+            <div style={gridItemStyle({marginRight: "16px"})}>{calendarDayIcon}1d</div>
+            <div style={gridItemStyle({marginRight: "16px"})}>{eventsCountIcon}{stats.today.count}</div>
+            <div style={gridItemStyle({marginRight: "16px"})}>{timeSavedIcon}{formatTimeSaved(stats.today.timeSaved)}</div>
+            <div style={gridItemStyle()}>{percentageIcon}{formatPercentage(ratios.today)}</div>
+            <div style={gridItemStyle({marginRight: "16px"})}>{calendarWeekIcon}1w</div>
+            <div style={gridItemStyle({marginRight: "16px"})}>{eventsCountIcon}{stats.thisWeek.count}</div>
+            <div style={gridItemStyle({marginRight: "16px"})}>{timeSavedIcon}{formatTimeSaved(stats.thisWeek.timeSaved)}</div>
+            <div style={gridItemStyle()}>{percentageIcon}{formatPercentage(ratios.thisWeek)}</div>
+            <div style={gridItemStyle({marginRight: "16px"})}>{calendarMonthIcon}1m</div>
+            <div style={gridItemStyle({marginRight: "16px"})}>{eventsCountIcon}{stats.thisMonth.count}</div>
+            <div style={gridItemStyle({marginRight: "16px"})}>{timeSavedIcon}{formatTimeSaved(stats.thisMonth.timeSaved)}</div>
+            <div style={gridItemStyle()}>{percentageIcon}{formatPercentage(ratios.thisMonth)}</div>
+          </div>
+        )}
       </div>
 
       <div style={panelStyle}>
         <div style={titleStyle}>Top Repositories</div>
         <div style={subtitleStyle}>Repositories with the highest auto-completion</div>
         {topRepositories.length > 0 ? (
-          <div style={gridStyle("auto auto")}>
+          <div style={overviewGridStyle()}>
             {topRepositories.map((repo) => (
               <>
-                <div style={{...gridItemStyle, marginRight: "70px"}}>
+                <div style={gridItemStyle()}>
                   {repositoryIcon(topRepositories.indexOf(repo))}
                   {repo.repository}
                 </div>
-                <div style={{...gridItemStyle, justifyContent: "flex-end"}}>{repo.count}</div>
+                <div style={gridItemStyle({justifyContent: "flex-end"})}>{repo.count}</div>
               </>
             ))}
           </div>

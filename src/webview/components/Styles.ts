@@ -29,18 +29,48 @@ export const subtitleStyle = {
   marginBottom: "3px",
 };
 
-export const gridStyle = (columns: string) => ({
+export const gridStyle = (customizations = {}) => ({
   display: "grid",
-  gridTemplateColumns: columns,
   alignItems: "center",
   marginBottom: "5px",
+  ...customizations,
 });
 
-export const gridItemStyle = {
+export const overviewGridStyle = (customizations = {}) => ({
+  ...gridStyle({
+    gridTemplateColumns: "auto auto",
+    width: "250px", 
+    ...customizations,
+  }),
+});
+
+export const detailsGridStyle = (customizations = {}) => ({
+  ...gridStyle({
+    gridTemplateColumns: "auto auto auto auto", 
+    borderRadius: "3px", 
+    border: "1px solid #3C3C3C", 
+    background: "#1E1E1E", 
+    padding: "8px 16px", 
+    width: "220px",
+    ...customizations,
+  }),
+});
+
+export const gridItemStyle = (customizations = {}) => ({
   flex: "1 0 0",
   fontWeight: "500",
   fontSize: "13px",
   display: "flex",
   alignItems: "center",
-  gap: "8px",
+  gap: "2px",
+  ...customizations,
+});
+
+export const detailsCollapseButtonStyle = {
+  cursor: "pointer",
+  color: "#3794FF",
+  fontSize: "13px",
+  fontStyle: "normal",
+  fontWeight: 500,
+  lineHeight: "normal",
 };
