@@ -3,6 +3,7 @@ import { AutoCompletionEvent, DocumentChangeEvent, HandWrittenEvent, HourlyAggre
 
 const AUTOCOMPLETION_EVENTS_KEY = 'autocompletionEvents';
 const HOURLY_AGGREGATE_PREFIX = 'aggregate: ';
+const TOTAL_AGGREGATE_KEY = 'total';
 
 let context: vscode.ExtensionContext;
 
@@ -20,6 +21,14 @@ const setHourlyAggregate = (hour: number, aggregate: HourlyAggregate) => {
 
 export const getHourlyAggregate = (hour: number): HourlyAggregate => {
     return context.globalState.get(hourToKey(hour)) as HourlyAggregate;
+};
+
+export const setTotalAggregate = (aggregate: Summarization) => {
+    context.globalState.update(TOTAL_AGGREGATE_KEY, aggregate);
+};
+
+export const getTotalAggregate = (): Summarization => {
+    return context.globalState.get(TOTAL_AGGREGATE_KEY) as Summarization;
 };
 
 const dateToHour = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours()).getTime();
@@ -105,6 +114,9 @@ const addDocumentChangeEvent = (event: DocumentChangeEvent) => {
     }
 
     setHourlyAggregate(hour, aggregate);
+
+    const totalAggregate = getTotalAggregate();
+    setTotalAggregate(updateSummarization(totalAggregate, change));
 }; 
 
 export const clearAutoCompletionEventQueue = () => {
