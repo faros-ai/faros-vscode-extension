@@ -9,6 +9,7 @@ const now = new Date(2024, 9, 17);
 const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
 const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+const startOfYear = new Date(now.getFullYear(), 1, 1);
 
 suite('Stats Test Suite', () => {
     setup(async () => {
@@ -27,6 +28,7 @@ suite('Stats Test Suite', () => {
             { timestamp: startOfWeek, autoCompletionCharCountChange: 30*CHARS_PER_MINUTE, filename: 'file2.js', extension: '.js', language: 'JavaScript', repository: 'repo2', branch: 'main' },
             { timestamp: startOfWeek, autoCompletionCharCountChange: 10*CHARS_PER_MINUTE, filename: 'file4.js', extension: '.ts', language: 'JavaScript', repository: 'repo2', branch: 'main' },
             { timestamp: startOfMonth, autoCompletionCharCountChange: 10*CHARS_PER_MINUTE, filename: 'file3.js', extension: '.py', language: 'JavaScript', repository: 'repo2', branch: 'main' },
+            { timestamp: startOfYear, autoCompletionCharCountChange: 10*CHARS_PER_MINUTE, filename: 'file3.js', extension: '.py', language: 'JavaScript', repository: 'repo2', branch: 'main' },
         ];
 
         events.forEach(addAutoCompletionEvent);
@@ -37,6 +39,7 @@ suite('Stats Test Suite', () => {
             today: { count: 4, timeSaved: 55 },
             thisWeek: { count: 6, timeSaved: 95 },
             thisMonth: { count: 7, timeSaved: 105 },
+            total: { count: 8, timeSaved: 115 },
         });
 
         
