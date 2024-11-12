@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { calculateAutoCompletionStats, calculateRatios, getTopRepositories } from "./stats";
+import { ThemeType } from "./webview/components/types";
 
 export default class FarosPanel implements vscode.WebviewViewProvider {
   public static readonly viewType = "farosPanel";
@@ -22,6 +23,13 @@ export default class FarosPanel implements vscode.WebviewViewProvider {
 	  });
   }
 
+  public setTheme(theme: vscode.ColorThemeKind) {
+    this.webview?.postMessage({
+      command: "themeChanged",
+      theme: theme === vscode.ColorThemeKind.Dark || theme === vscode.ColorThemeKind.HighContrast ? "Dark" : "Light" as ThemeType,
+    });
+  }
+
   public resolveWebviewView(
     webviewView: vscode.WebviewView,
     context: vscode.WebviewViewResolveContext,
@@ -35,6 +43,9 @@ export default class FarosPanel implements vscode.WebviewViewProvider {
             break;
           case "refresh":
             this.refresh();
+            break;
+          case "themeChanged":
+            this.setTheme(msg.theme);
             break;
         }
       },

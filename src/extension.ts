@@ -9,7 +9,8 @@ import * as path from "path";
 import FarosPanel from "./panel";
 
 let statusBarItem: vscode.StatusBarItem;
-let ev: vscode.Disposable | null = null;
+let changeTextDocumentListener: vscode.Disposable | null = null;
+let themeChangedListener: vscode.Disposable | null = null;
 let suggestionsCount = 0;
 let charCount = 0;
 let previousText = "";
@@ -73,8 +74,8 @@ function registerSuggestionListener() {
     statusBarItem.show();
   }
 
-  if (ev === null) {
-    ev = vscode.workspace.onDidChangeTextDocument((event) => {
+  if (changeTextDocumentListener === null) {
+    changeTextDocumentListener = vscode.workspace.onDidChangeTextDocument((event) => {
       const activeEditor = vscode.window.activeTextEditor;
       if (!activeEditor || event.document !== activeEditor.document) {
         return;
@@ -123,6 +124,12 @@ function registerSuggestionListener() {
       previousText = updatedText;
     });
   }
+
+  if (themeChangedListener === null) {
+    themeChangedListener = vscode.window.onDidChangeActiveColorTheme((event) => {
+      farosPanel?.setTheme(event.kind);
+    });
+  }
 }
 
 // This method is called when your extension is activated
@@ -136,6 +143,7 @@ export function activate(context: vscode.ExtensionContext) {
   registerSuggestionListener();
 
   farosPanel = new FarosPanel(context.extensionUri);
+  farosPanel.setTheme(vscode.window.activeColorTheme.kind);
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
       FarosPanel.viewType,
