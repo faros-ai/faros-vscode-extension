@@ -1,3 +1,5 @@
+import { ThemeType } from "./types";
+
 export const panelStyle = {
   borderBottom: "1px solid #606060",
   padding: "20px 12px 20px 20px",
@@ -39,19 +41,19 @@ export const gridStyle = (customizations = {}) => ({
 export const overviewGridStyle = (customizations = {}) => ({
   ...gridStyle({
     gridTemplateColumns: "auto auto",
-    width: "250px", 
+    width: "255px", 
     ...customizations,
   }),
 });
 
-export const detailsGridStyle = (customizations = {}) => ({
+export const detailsGridStyle = (theme: ThemeType, customizations = {}) => ({
   ...gridStyle({
     gridTemplateColumns: "auto auto auto auto", 
     borderRadius: "3px", 
-    border: "1px solid #3C3C3C", 
-    background: "#1E1E1E", 
+    border: `1px solid ${theme === "Dark" ? "#3C3C3C" : "#E0E0E0"}`, 
+    background: theme === "Dark" ? "#1E1E1E" : "#FFFFFF", 
     padding: "8px 16px", 
-    width: "220px",
+    width: "225px",
     ...customizations,
   }),
 });

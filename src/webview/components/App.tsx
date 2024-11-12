@@ -9,8 +9,8 @@ import {
   percentageIcon,
   chevronIcon,
 } from "./Icons";
-
 import {detailsCollapseButtonStyle, detailsGridStyle, gridItemStyle, overviewGridStyle, panelStyle, subtitleStyle, titleStyle } from "./Styles";
+import { ThemeType } from "./types";
 
 const App = () => {
   const [stats, setStats] = React.useState<{
@@ -42,7 +42,8 @@ const App = () => {
     }[]
   >([]);
   const [showDetailedBreakdown, setShowDetailedBreakdown] = React.useState(false);
-
+  const [theme, setTheme] = React.useState<ThemeType>("Dark");
+  
   React.useEffect(() => {
     window.addEventListener("message", (event) => {
       const message = event.data; // The json data that the extension sent
@@ -56,6 +57,9 @@ const App = () => {
           setStats(message.stats);
           setRatios(message.ratios);
           setTopRepositories(message.topRepositories);
+          break;
+        case "themeChanged":
+          setTheme(message.theme as ThemeType);
           break;
       }
     });
@@ -79,14 +83,14 @@ const App = () => {
         <div style={overviewGridStyle()}>
           <div style={gridItemStyle()}>{eventsCountIcon}Total Auto-completions</div><div style={gridItemStyle({justifyContent: "flex-end"})}>{stats.total.count}</div>
           <div style={gridItemStyle()}>{timeSavedIcon}Time saved</div><div style={gridItemStyle({justifyContent: "flex-end"})}>{formatTimeSaved(stats.total.timeSaved)}</div>
-          <div style={gridItemStyle()}>{percentageIcon}Auto-completed ratio</div><div style={gridItemStyle({justifyContent: "flex-end"})}>{formatPercentage(ratios.total)}</div>
+          <div style={gridItemStyle({gap: "5px"})}>{percentageIcon}Auto-completed ratio</div><div style={gridItemStyle({justifyContent: "flex-end"})}>{formatPercentage(ratios.total)}</div>
         </div>
         <div style={{display: "flex", alignItems: "center", gap: "4px"}}>
           {chevronIcon(showDetailedBreakdown)}
           <a style={detailsCollapseButtonStyle} onClick={() => setShowDetailedBreakdown(!showDetailedBreakdown)}>Detailed Breakdown</a>
         </div>
         {showDetailedBreakdown && (
-          <div style={detailsGridStyle()}>
+          <div style={detailsGridStyle(theme)}>
             <div style={gridItemStyle({marginRight: "16px"})}>{calendarDayIcon}1d</div>
             <div style={gridItemStyle({marginRight: "16px"})}>{eventsCountIcon}{stats.today.count}</div>
             <div style={gridItemStyle({marginRight: "16px"})}>{timeSavedIcon}{formatTimeSaved(stats.today.timeSaved)}</div>
