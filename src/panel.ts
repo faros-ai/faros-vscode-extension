@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { calculateAutoCompletionStats, calculateRatios, getTopRepositories } from "./stats";
+import { calculateAutoCompletionStats, calculateRatios, getTopLanguages, getTopRepositories } from "./stats";
 import { ThemeType } from "./webview/components/types";
 
 export default class FarosPanel implements vscode.WebviewViewProvider {
@@ -14,19 +14,21 @@ export default class FarosPanel implements vscode.WebviewViewProvider {
     const stats = calculateAutoCompletionStats();
     const ratios = calculateRatios();
     const topRepositories = getTopRepositories(5);
+    const topLanguages = getTopLanguages(5);
 
 	this.webview?.postMessage({
 		command: "refresh",
 		stats,
 		ratios,
 		topRepositories,
+    topLanguages,
 	  });
   }
 
-  public setTheme(theme: vscode.ColorThemeKind) {
+  public updateTheme() {
     this.webview?.postMessage({
       command: "themeChanged",
-      theme: theme === vscode.ColorThemeKind.Dark || theme === vscode.ColorThemeKind.HighContrast ? "Dark" : "Light" as ThemeType,
+      theme: vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark || vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.HighContrast ? "Dark" : "Light" as ThemeType,
     });
   }
 
@@ -40,12 +42,7 @@ export default class FarosPanel implements vscode.WebviewViewProvider {
         switch (msg.command) {
           case "startup":
             this.refresh();
-            break;
-          case "refresh":
-            this.refresh();
-            break;
-          case "themeChanged":
-            this.setTheme(msg.theme);
+            this.updateTheme();
             break;
         }
       },

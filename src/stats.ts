@@ -97,9 +97,37 @@ export const getTopRepositories = (limit: number = 5, now: Date = new Date()): {
     });
 
     const sortedRepositories = Object.entries(repositoryCounts)
-        .sort(([, countA], [, countB]) => countB - countA)
+        .sort(([langA, countA], [langB, countB]) => {
+            const countDiff = countB - countA;
+            return countDiff !== 0 ? countDiff : langA.localeCompare(langB);
+        })
         .slice(0, limit)
         .map(([repository, count]) => ({ repository, count }));
     
     return sortedRepositories;
+};
+
+export const getTopLanguages = (limit: number = 5, now: Date = new Date()): { language: string; count: number }[] => {
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const history = getHourlyAggregateForRange(startOfMonth, now);
+
+    const languageCounts: { [key: string]: number } = {};
+
+    history.forEach(aggregate => {
+        if (aggregate.languages) {
+            Object.keys(aggregate.languages).forEach(language => {
+                languageCounts[language] = (languageCounts[language] || 0) + aggregate.languages[language].autoCompletionEventCount;
+            });
+        }
+    });
+
+    const sortedLanguages = Object.entries(languageCounts)
+        .sort(([langA, countA], [langB, countB]) => {
+            const countDiff = countB - countA;
+            return countDiff !== 0 ? countDiff : langA.localeCompare(langB);
+        })
+        .slice(0, limit)
+        .map(([language, count]) => ({ language, count }));
+    
+    return sortedLanguages;
 };

@@ -41,6 +41,12 @@ const App = () => {
       count: number;
     }[]
   >([]);
+  const [topLanguages, setTopLanguages] = React.useState<
+    {
+      language: string;
+      count: number;
+    }[]
+  >([]);
   const [showDetailedBreakdown, setShowDetailedBreakdown] = React.useState(false);
   const [theme, setTheme] = React.useState<ThemeType>("Dark");
   
@@ -48,15 +54,11 @@ const App = () => {
     window.addEventListener("message", (event) => {
       const message = event.data; // The json data that the extension sent
       switch (message.command) {
-        case "startup":
-          setStats(message.stats);
-          setRatios(message.ratios);
-          setTopRepositories(message.topRepositories);
-          break;
         case "refresh":
           setStats(message.stats);
           setRatios(message.ratios);
           setTopRepositories(message.topRepositories);
+          setTopLanguages(message.topLanguages);
           break;
         case "themeChanged":
           setTheme(message.theme as ThemeType);
@@ -119,6 +121,26 @@ const App = () => {
                   {repo.repository}
                 </div>
                 <div style={gridItemStyle({justifyContent: "flex-end"})}>{repo.count}</div>
+              </>
+            ))}
+          </div>
+        ) : (
+          <div>N/A</div>
+        )}
+      </div>
+
+      <div style={panelStyle}>
+        <div style={titleStyle}>Top Languages</div>
+        <div style={subtitleStyle}>Languages with the highest auto-completion</div>
+        {topLanguages.length > 0 ? (
+          <div style={overviewGridStyle()}>
+            {topLanguages.map((lang) => (
+              <>
+                <div style={gridItemStyle()}>
+                  {repositoryIcon(topLanguages.indexOf(lang))}
+                  {lang.language}
+                </div>
+                <div style={gridItemStyle({justifyContent: "flex-end"})}>{lang.count}</div>
               </>
             ))}
           </div>
