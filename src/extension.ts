@@ -127,7 +127,7 @@ function registerSuggestionListener() {
 
   if (themeChangedListener === null) {
     themeChangedListener = vscode.window.onDidChangeActiveColorTheme((event) => {
-      farosPanel?.setTheme(event.kind);
+      farosPanel?.updateTheme();
     });
   }
 }
@@ -143,7 +143,6 @@ export function activate(context: vscode.ExtensionContext) {
   registerSuggestionListener();
 
   farosPanel = new FarosPanel(context.extensionUri);
-  farosPanel.setTheme(vscode.window.activeColorTheme.kind);
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
       FarosPanel.viewType,

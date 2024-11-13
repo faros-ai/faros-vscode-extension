@@ -41,7 +41,7 @@ export const gridStyle = (customizations = {}) => ({
 export const overviewGridStyle = (customizations = {}) => ({
   ...gridStyle({
     gridTemplateColumns: "auto auto",
-    width: "255px", 
+    width: "260px", 
     ...customizations,
   }),
 });
@@ -53,7 +53,7 @@ export const detailsGridStyle = (theme: ThemeType, customizations = {}) => ({
     border: `1px solid ${theme === "Dark" ? "#3C3C3C" : "#E0E0E0"}`, 
     background: theme === "Dark" ? "#1E1E1E" : "#FFFFFF", 
     padding: "8px 16px", 
-    width: "225px",
+    width: "230px",
     ...customizations,
   }),
 });
