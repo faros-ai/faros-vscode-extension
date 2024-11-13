@@ -2,7 +2,7 @@
   "name": "faros-vscode-extension",
   "displayName": "Faros AI",
   "description": "Faros AI's Visual Studio Code extension",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "publisher": "farosai",
   "icon": "images/logo.png",
   "engines": {
