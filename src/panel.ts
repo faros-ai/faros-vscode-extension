@@ -1,6 +1,10 @@
 import * as vscode from "vscode";
-import { calculateAutoCompletionStats, calculateRatios, getTopLanguages, getTopRepositories } from "./stats";
+import { calculateAutoCompletionStats, calculateRatios, getRecentHourlyChartData, getTopLanguages, getTopRepositories } from "./stats";
 import { ThemeType } from "./webview/components/types";
+
+const RECENT_HOURLY_CHART_DATA_HOURS = 24;
+const TOP_LANGUAGES_LIMIT = 5;
+const TOP_REPOSITORIES_LIMIT = 5;
 
 export default class FarosPanel implements vscode.WebviewViewProvider {
   public static readonly viewType = "farosPanel";
@@ -13,8 +17,9 @@ export default class FarosPanel implements vscode.WebviewViewProvider {
   public refresh() {
     const stats = calculateAutoCompletionStats();
     const ratios = calculateRatios();
-    const topRepositories = getTopRepositories(5);
-    const topLanguages = getTopLanguages(5);
+    const topRepositories = getTopRepositories(TOP_REPOSITORIES_LIMIT);
+    const topLanguages = getTopLanguages(TOP_LANGUAGES_LIMIT);
+    const recentHourlyAggregates = getRecentHourlyChartData(RECENT_HOURLY_CHART_DATA_HOURS);
 
 	this.webview?.postMessage({
 		command: "refresh",
@@ -22,6 +27,7 @@ export default class FarosPanel implements vscode.WebviewViewProvider {
 		ratios,
 		topRepositories,
     topLanguages,
+    recentHourlyAggregates,
 	  });
   }
 

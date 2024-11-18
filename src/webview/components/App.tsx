@@ -10,7 +10,8 @@ import {
   chevronIcon,
 } from "./Icons";
 import {detailsCollapseButtonStyle, detailsGridStyle, gridItemStyle, overviewGridStyle, panelStyle, subtitleStyle, titleStyle } from "./Styles";
-import { ThemeType } from "./types";
+import { IGroupedData, ThemeType } from "./types";
+import { StackedBarChart } from "./StackedBarChart";
 
 const App = () => {
   const [stats, setStats] = React.useState<{
@@ -49,6 +50,7 @@ const App = () => {
   >([]);
   const [showDetailedBreakdown, setShowDetailedBreakdown] = React.useState(false);
   const [theme, setTheme] = React.useState<ThemeType>("Dark");
+  const [chartData, setChartData] = React.useState<IGroupedData[]>([]);
   
   React.useEffect(() => {
     window.addEventListener("message", (event) => {
@@ -59,6 +61,7 @@ const App = () => {
           setRatios(message.ratios);
           setTopRepositories(message.topRepositories);
           setTopLanguages(message.topLanguages);
+          setChartData(message.recentHourlyAggregates);
           break;
         case "themeChanged":
           setTheme(message.theme as ThemeType);
@@ -82,6 +85,7 @@ const App = () => {
       <div style={panelStyle}>
         <div style={titleStyle}>My Stats</div>
         <div style={subtitleStyle}>Overview of my auto-completion usage</div>
+        <StackedBarChart data={chartData} />
         <div style={overviewGridStyle()}>
           <div style={gridItemStyle()}>{eventsCountIcon}Total Auto-completions</div><div style={gridItemStyle({justifyContent: "flex-end"})}>{stats.total.count}</div>
           <div style={gridItemStyle()}>{timeSavedIcon}Time saved</div><div style={gridItemStyle({justifyContent: "flex-end"})}>{formatTimeSaved(stats.total.timeSaved)}</div>
