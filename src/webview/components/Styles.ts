@@ -67,6 +67,7 @@ export const gridItemStyle = (customizations = {}) => ({
   display: "flex",
   alignItems: "center",
   gap: "2px",
+  marginBottom: "3px",
   ...customizations,
 });
 
