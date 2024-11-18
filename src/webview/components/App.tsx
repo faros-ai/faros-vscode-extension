@@ -8,6 +8,7 @@ import {
   repositoryIcon,
   percentageIcon,
   chevronIcon,
+  languageIcon,
 } from "./Icons";
 import {detailsCollapseButtonStyle, detailsGridStyle, gridItemStyle, overviewGridStyle, panelStyle, subtitleStyle, titleStyle } from "./Styles";
 import { IGroupedData, ThemeType } from "./types";
@@ -141,7 +142,7 @@ const App = () => {
             {topLanguages.map((lang) => (
               <>
                 <div style={gridItemStyle()}>
-                  {repositoryIcon(topLanguages.indexOf(lang))}
+                  {languageIcon(topLanguages.indexOf(lang))}
                   {lang.language}
                 </div>
                 <div style={gridItemStyle({justifyContent: "flex-end"})}>{lang.count}</div>
