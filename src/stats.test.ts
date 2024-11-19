@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import * as assert from 'assert';
-import { calculateAutoCompletionStats, CHARS_PER_MINUTE, getTopLanguages, getTopRepositories } from './stats';
+import { calculateAutoCompletionStats, CHARS_PER_MINUTE, getRecentHourlyChartData, getTopLanguages, getTopRepositories } from './stats';
 import { AutoCompletionEvent } from './types';
-import { addAutoCompletionEvent, setContext } from './state';
+import { addAutoCompletionEvent, addHandWrittenEvent, setContext } from './state';
 import { clearGlobalState } from './util';
 
 const now = new Date(2024, 9, 17);
@@ -94,5 +94,35 @@ suite('Stats Test Suite', () => {
             { language: 'Rust', count: 1 },
             { language: 'TypeScript', count: 1 },
         ]);
+    });
+
+    test('getRecentHourlyChartData should return correct chart data', async () => {
+        const now = new Date();
+        const oneHourAgo = new Date(now.getTime() - 1 * 60 * 60 * 1000);
+        const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
+
+        addAutoCompletionEvent({ timestamp: now, autoCompletionCharCountChange: 100, filename: 'file1.ts', extension: '.ts', language: 'TypeScript', repository: 'repo1', branch: 'main' });
+        addAutoCompletionEvent({ timestamp: oneHourAgo, autoCompletionCharCountChange: 200, filename: 'file2.js', extension: '.js', language: 'JavaScript', repository: 'repo2', branch: 'feature' });
+        addAutoCompletionEvent({ timestamp: twoHoursAgo, autoCompletionCharCountChange: 300, filename: 'file3.py', extension: '.py', language: 'Python', repository: 'repo3', branch: 'develop' });
+
+        addHandWrittenEvent({ timestamp: now, handWrittenCharCountChange: 50, filename: 'file1.ts', extension: '.ts', language: 'TypeScript', repository: 'repo1', branch: 'main' });
+        addHandWrittenEvent({ timestamp: oneHourAgo, handWrittenCharCountChange: 75, filename: 'file2.js', extension: '.js', language: 'JavaScript', repository: 'repo2', branch: 'feature' });
+        addHandWrittenEvent({ timestamp: twoHoursAgo, handWrittenCharCountChange: 100, filename: 'file3.py', extension: '.py', language: 'Python', repository: 'repo3', branch: 'develop' });
+
+        const result = getRecentHourlyChartData(3, now);
+
+        assert.strictEqual(result.length, 4);
+        
+        // Most recent hour
+        assert.strictEqual(result[3].values[0], 100); // Auto-completed chars
+        assert.strictEqual(result[3].values[1], 50);   // Handwritten chars
+
+        // One hour ago
+        assert.strictEqual(result[2].values[0], 200);
+        assert.strictEqual(result[2].values[1], 75);
+
+        // Two hours ago
+        assert.strictEqual(result[1].values[0], 300);
+        assert.strictEqual(result[1].values[1], 100);
     });
 });
