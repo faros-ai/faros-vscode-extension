@@ -2,7 +2,7 @@ import * as d3 from "d3";
 import { useEffect, useRef } from "react";
 import { IGroupedData } from "./types";
 import React = require("react");
-import { PANEL_WIDTH } from "./Styles";
+import { PANEL_WIDTH, tooltipStyle } from "./styles";
 
 interface Props {
   data: IGroupedData[];
@@ -22,9 +22,9 @@ export function StackedBarChart({ data }: Props) {
     .join("\n");
   const csv = d3.csvParse([header, body].join("\n"));
 
-  const margin = { top: 0, right: 0, bottom: 0, left: 0 };
+  const margin = { top: 0, right: 0, bottom: 1, left: 0 };
   const width = PANEL_WIDTH - margin.left - margin.right;
-  const height = 30 - margin.top - margin.bottom;
+  const height = 35 - margin.top - margin.bottom;
 
   const subgroups = header.split(",");
   const labels = csv.map((data) => data.label || "");
@@ -52,6 +52,52 @@ export function StackedBarChart({ data }: Props) {
     }
   }, [scaleX, scaleY]);
 
+  const TOOLTIP_ID = 'chart-tooltip';
+
+  const handleMouseEnter = (label: string, value1: number, value2: number) => {
+    const autoCompleted = Number(value1);
+    const handwritten = Number(value2);
+    const tooltip = document.createElement('div');
+    Object.assign(tooltip.style, tooltipStyle);
+    tooltip.id = TOOLTIP_ID;
+    tooltip.innerHTML = `
+      <div style="text-decoration: underline; padding-bottom: 5px">${label}</div>
+      <div>Handwritten:</div>
+      <li>${handwritten} chars (${((handwritten) / (autoCompleted + handwritten) * 100).toFixed(0)}%)</li>
+      <div>Auto-completed:</div>
+      <li>${autoCompleted} chars (${((autoCompleted) / (autoCompleted + handwritten) * 100).toFixed(0)}%)</li>
+    `;
+    document.body.appendChild(tooltip);
+  };
+
+  const handleMouseLeave = () => {
+    const tooltip = document.getElementById(TOOLTIP_ID);
+    if (tooltip) {
+      tooltip.remove();
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<SVGRectElement>) => {
+    const tooltip = document.getElementById(TOOLTIP_ID);
+    if (tooltip) {
+      const tooltipWidth = tooltip.offsetWidth;
+      const windowWidth = window.innerWidth;
+      const cursorX = e.clientX;
+      const padding = 10;
+      const wouldOverflowRight = cursorX + tooltipWidth + padding > windowWidth;
+      const wouldOverflowLeft = cursorX - tooltipWidth - padding < 0;
+
+      if (wouldOverflowRight) {
+        tooltip.style.left = `${cursorX - tooltipWidth - padding}px`;
+      } else if (wouldOverflowLeft) {
+        tooltip.style.left = `${cursorX + padding}px`;
+      } else {
+        tooltip.style.left = `${cursorX + padding}px`;
+      }
+      tooltip.style.top = `${e.clientY - padding}px`;
+    }
+  };
+
   return (
     <svg
       width={width + margin.left + margin.right}
@@ -75,6 +121,9 @@ export function StackedBarChart({ data }: Props) {
                     y={y1}
                     width={scaleX.bandwidth()}
                     height={y0 - y1 || 0}
+                    onMouseEnter={() => handleMouseEnter(label, d.data.value1, d.data.value2)}
+                    onMouseLeave={handleMouseLeave}
+                    onMouseMove={handleMouseMove}
                   />
                 );
               })}

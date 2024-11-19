@@ -79,3 +79,13 @@ export const detailsCollapseButtonStyle = {
   fontWeight: 500,
   lineHeight: "normal",
 };
+
+export const tooltipStyle = {
+  position: 'absolute',
+  backgroundColor: 'rgba(0,0,0,0.8)',
+  color: 'white',
+  padding: '5px',
+  borderRadius: '3px',
+  fontSize: '12px',
+  pointerEvents: 'none',
+};

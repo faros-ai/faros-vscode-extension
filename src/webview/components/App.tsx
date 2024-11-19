@@ -10,7 +10,7 @@ import {
   chevronIcon,
   languageIcon,
 } from "./Icons";
-import {detailsCollapseButtonStyle, detailsGridStyle, gridItemStyle, overviewGridStyle, panelStyle, subtitleStyle, titleStyle } from "./Styles";
+import {detailsCollapseButtonStyle, detailsGridStyle, gridItemStyle, overviewGridStyle, panelStyle, subtitleStyle, titleStyle } from "./styles";
 import { IGroupedData, ThemeType } from "./types";
 import { StackedBarChart } from "./StackedBarChart";
 

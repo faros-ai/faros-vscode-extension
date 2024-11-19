@@ -33,15 +33,32 @@ export const getTotalAggregate = (): Summarization => {
 
 const dateToHour = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours()).getTime();
 
-export const getHourlyAggregateForRange = (startDate: Date, endDate: Date): Array<HourlyAggregate> => {
+export const getHourlyAggregateForRange = (startDate: Date, endDate: Date, pushEmpty: boolean = false): Array<HourlyAggregate> => {
     const history = [];
     let currentDate = startDate;
+    currentDate.setMinutes(0);
+    currentDate.setSeconds(0);
+    currentDate.setMilliseconds(0);
     while (currentDate <= endDate) {
         const hour = dateToHour(currentDate);
         const aggregate = getHourlyAggregate(hour);
         if (aggregate) {
             history.push(aggregate);
-        }
+        } else if (pushEmpty) {
+            history.push({
+                hour,
+                totals: {
+                    autoCompletionEventCount: 0,
+                    autoCompletionCharCount: 0,
+                    handWrittenCharCount: 0,
+                },
+                filenames: {},
+                languages: {},
+                extensions: {},
+                repositories: {},
+                branches: {},
+            });
+        }   
         currentDate.setHours(currentDate.getHours() + 1);
     }
     return history;
