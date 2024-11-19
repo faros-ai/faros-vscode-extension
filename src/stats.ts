@@ -131,3 +131,14 @@ export const getTopLanguages = (limit: number = 5, now: Date = new Date()): { la
     
     return sortedLanguages;
 };
+
+export const getRecentHourlyChartData = (hours: number = 24, now: Date = new Date()): Array<{ label: string, values: [number, number] }> => {
+    const aggregates = getHourlyAggregateForRange(new Date(now.getTime() - hours * 60 * 60 * 1000), now, true);
+    return aggregates.map((aggregate) => {
+        const label = new Date(aggregate.hour).toLocaleString(undefined, { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric' }).replace(',', ' -');
+        return {
+            label,
+            values: [aggregate.totals.autoCompletionCharCount, aggregate.totals.handWrittenCharCount]
+        };
+    });
+};

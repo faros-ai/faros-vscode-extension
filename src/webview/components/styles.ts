@@ -1,5 +1,7 @@
 import { ThemeType } from "./types";
 
+export const PANEL_WIDTH = 260;
+
 export const panelStyle = {
   borderBottom: "1px solid #606060",
   padding: "20px 12px 20px 20px",
@@ -41,7 +43,7 @@ export const gridStyle = (customizations = {}) => ({
 export const overviewGridStyle = (customizations = {}) => ({
   ...gridStyle({
     gridTemplateColumns: "auto auto",
-    width: "260px", 
+    width: `${PANEL_WIDTH}px`, 
     ...customizations,
   }),
 });
@@ -53,7 +55,7 @@ export const detailsGridStyle = (theme: ThemeType, customizations = {}) => ({
     border: `1px solid ${theme === "Dark" ? "#3C3C3C" : "#E0E0E0"}`, 
     background: theme === "Dark" ? "#1E1E1E" : "#FFFFFF", 
     padding: "8px 16px", 
-    width: "230px",
+    width: `${PANEL_WIDTH - 30}px`,
     ...customizations,
   }),
 });
@@ -65,6 +67,7 @@ export const gridItemStyle = (customizations = {}) => ({
   display: "flex",
   alignItems: "center",
   gap: "2px",
+  marginBottom: "3px",
   ...customizations,
 });
 
@@ -75,4 +78,14 @@ export const detailsCollapseButtonStyle = {
   fontStyle: "normal",
   fontWeight: 500,
   lineHeight: "normal",
+};
+
+export const tooltipStyle = {
+  position: 'absolute',
+  backgroundColor: 'rgba(0,0,0,0.8)',
+  color: 'white',
+  padding: '5px',
+  borderRadius: '3px',
+  fontSize: '12px',
+  pointerEvents: 'none',
 };
