@@ -22,7 +22,7 @@ function checkAndLogEvents() {
   if (autoCompletionEvents.length > 0) {
     console.log("Sending autocompletion events:", autoCompletionEvents);
     try {
-      send(autoCompletionEvents, 'AutoCompletion');
+      send(autoCompletionEvents, farosConfig.autoCompletionCategory());
     } catch (error) {
       console.error("Error sending autocompletion events:", error);
     }
@@ -34,7 +34,7 @@ function checkAndLogEvents() {
   if (handWrittenEvents.length > 0) {
     console.log("Sending hand written events:", handWrittenEvents);
     try {
-      send(squash(handWrittenEvents), 'HandWritten');
+      send(squash(handWrittenEvents), farosConfig.handWrittenCategory());
     } catch (error) {
       console.error("Error sending hand written events:", error);
     }
