@@ -2,7 +2,7 @@
   "name": "faros-vscode-extension",
   "displayName": "Faros AI",
   "description": "Faros AI's Visual Studio Code extension",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "publisher": "farosai",
   "icon": "images/logo.png",
   "engines": {
@@ -91,6 +91,21 @@
           "type": "number",
           "default": 60000,
           "description": "Send batch interval"
+        },
+        "faros.autoCompletionCategory": {
+          "type": "string",
+          "default": "AutoCompletion",
+          "description": "AutoCompletion category"
+        },
+        "faros.handWrittenCategory": {
+          "type": "string",
+          "default": "HandWritten",
+          "description": "HandWritten category"
+        },
+        "faros.userSource": {
+          "type": "string",
+          "default": "vscode-extension",
+          "description": "User source"
         }
       }
     }

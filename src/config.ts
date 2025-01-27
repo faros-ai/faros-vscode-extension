@@ -18,6 +18,9 @@ export interface FarosConfig {
   batchSize: () => number;
   batchInterval: () => number;
   webhook: () => string;
+  autoCompletionCategory: () => string;
+  handWrittenCategory: () => string;
+  userSource: () => string;
 }
 
 export const farosConfig: FarosConfig = {
@@ -38,6 +41,9 @@ export const farosConfig: FarosConfig = {
   batchSize: () => config.get('batchSize') || 500,
   batchInterval: () => Number(config.get('batchInterval')) || 60000,
   webhook: () => config.get('webhook') || '',
+  autoCompletionCategory: () => config.get('autoCompletionCategory') || 'AutoCompletion',
+  handWrittenCategory: () => config.get('handWrittenCategory') || 'HandWritten',
+  userSource: () => config.get('userSource') || 'vscode-extension',
 };
 
 export function updateConfig(): void {

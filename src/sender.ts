@@ -18,6 +18,7 @@ async function* mutations(
     uid: farosConfig.vcsUid(),
     name: farosConfig.vcsName(),
     email: farosConfig.vcsEmail(),
+    source: farosConfig.userSource(),
   };
   yield qb.upsert({ vcs_User });
 
