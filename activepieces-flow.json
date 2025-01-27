@@ -1,10 +1,10 @@
 {
   "name": "faros-vscode-extension-webhook",
-  "description": "This workflow handles webhook events from the VSCode extension, authenticates with Faros, and sends the data to the Faros API.",
+  "description": "",
   "tags": [],
   "pieces": [
     "@activepieces/piece-webhook",
-    "@activepieces/piece-http"
+    "@activepieces/piece-faros-advanced"
   ],
   "template": {
     "displayName": "Faros VSCode Extension Webhook",
@@ -15,19 +15,20 @@
       "type": "PIECE_TRIGGER",
       "settings": {
         "pieceName": "@activepieces/piece-webhook",
-        "pieceVersion": "0.1.5",
+        "pieceVersion": "0.1.10",
         "pieceType": "OFFICIAL",
         "packageType": "REGISTRY",
         "input": {
           "authType": "none",
           "authFields": {}
         },
-        "inputUiInfo": {},
+        "inputUiInfo": {
+          "customizedInputs": {}
+        },
         "triggerName": "catch_webhook"
       },
       "nextAction": {
-        "name": "step_1",
-        "displayName": "Ensure permitted mutations",
+        "name": "step_2",
         "type": "CODE",
         "valid": true,
         "settings": {
@@ -38,7 +39,9 @@
             "code": "export const code = async (inputs) => {\n    const input = inputs.body.query;\n  \n     // Define the list of permitted mutations\n    const permittedMutations = [\n        'insert_vcs_User_one',\n        'insert_vcs_UserTool_one',\n        'insert_vcs_UserToolUsage_one',\n        'update_columns',\n        'insert_vcs_File_one',\n        'insert_vcs_Branch_one',\n        'insert_vcs_Repository_one'\n    ];\n\n    // Regular expression to match any mutation starting with insert_, update_, or delete_\n    const mutationRegex = /\\b(insert_|update_|delete_)\\w+/g;\n\n    // Find all mutations in the input string\n    const mutations = input.match(mutationRegex);\n\n    // If no mutations are found, return true (no unpermitted mutation)\n    if (!mutations) {\n        return true; // No mutation found, hence no unpermitted mutation\n    }\n\n    // Check if all mutations found are in the permitted list\n    const hasUnpermittedMutation = mutations.some(mutation => !permittedMutations.includes(mutation));\n\n    if (hasUnpermittedMutation) {\n      throw new Error(\"Unpermitted mutation identified\");\n    }\n\n    return true;\n};",
             "packageJson": "{}"
           },
-          "inputUiInfo": {},
+          "inputUiInfo": {
+            "customizedInputs": {}
+          },
           "errorHandlingOptions": {
             "retryOnFailure": {
               "value": false
@@ -49,32 +52,24 @@
           }
         },
         "nextAction": {
-          "name": "step_2",
-          "displayName": "Update graph",
+          "name": "step_3",
+          "skip": false,
           "type": "PIECE",
           "valid": true,
           "settings": {
             "input": {
-              "url": "https://prod.api.faros.ai/graphs/default/graphql",
-              "body": {
-                "data": "{{trigger['body']}}"
-              },
-              "method": "POST",
-              "headers": {
-                "authorization": "<KEY>"
-              },
-              "failsafe": false,
-              "body_type": "json",
-              "use_proxy": false,
-              "queryParams": {},
-              "proxy_settings": {}
+              "graph": "default",
+              "query": "{{trigger['body']['query']}}",
+              "variables": {}
             },
-            "pieceName": "@activepieces/piece-http",
-            "pieceType": "OFFICIAL",
-            "actionName": "send_request",
-            "inputUiInfo": {},
-            "packageType": "REGISTRY",
-            "pieceVersion": "0.5.1",
+            "pieceName": "@activepieces/piece-faros-advanced",
+            "pieceType": "CUSTOM",
+            "actionName": "writeMutations",
+            "inputUiInfo": {
+              "customizedInputs": {}
+            },
+            "packageType": "ARCHIVE",
+            "pieceVersion": "0.0.2",
             "errorHandlingOptions": {
               "retryOnFailure": {
                 "value": false
@@ -83,11 +78,14 @@
                 "value": false
               }
             }
-          }
-        }
+          },
+          "displayName": "Write Mutations"
+        },
+        "displayName": "Ensure permitted mutations"
       }
     },
-    "valid": true
+    "valid": true,
+    "schemaVersion": "1"
   },
   "blogUrl": ""
 }

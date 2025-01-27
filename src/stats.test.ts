@@ -21,14 +21,14 @@ suite('Stats Test Suite', () => {
 
     test('calculateAutoCompletionStats should calculate stats correctly for today, this week, and this month', async () => {
         const events: AutoCompletionEvent[] = [
-            { timestamp: startOfDay, autoCompletionCharCountChange: 5*CHARS_PER_MINUTE, filename: 'file1.ts', extension: '.ts', language: 'TypeScript', repository: 'repo1', branch: 'main' },
-            { timestamp: startOfDay, autoCompletionCharCountChange: 15*CHARS_PER_MINUTE, filename: 'file2.js', extension: '.js', language: 'JavaScript', repository: 'repo2', branch: 'feature' },
-            { timestamp: startOfDay, autoCompletionCharCountChange: 25*CHARS_PER_MINUTE, filename: 'file3.py', extension: '.py', language: 'Python', repository: 'repo3', branch: 'develop' },
-            { timestamp: startOfDay, autoCompletionCharCountChange: 10*CHARS_PER_MINUTE, filename: 'file4.ts', extension: '.ts', language: 'TypeScript', repository: 'repo1', branch: 'main' },
-            { timestamp: startOfWeek, autoCompletionCharCountChange: 30*CHARS_PER_MINUTE, filename: 'file2.js', extension: '.js', language: 'JavaScript', repository: 'repo2', branch: 'main' },
-            { timestamp: startOfWeek, autoCompletionCharCountChange: 10*CHARS_PER_MINUTE, filename: 'file4.js', extension: '.ts', language: 'JavaScript', repository: 'repo2', branch: 'main' },
-            { timestamp: startOfMonth, autoCompletionCharCountChange: 10*CHARS_PER_MINUTE, filename: 'file3.js', extension: '.py', language: 'JavaScript', repository: 'repo2', branch: 'main' },
-            { timestamp: startOfYear, autoCompletionCharCountChange: 10*CHARS_PER_MINUTE, filename: 'file3.js', extension: '.py', language: 'JavaScript', repository: 'repo2', branch: 'main' },
+            { timestamp: startOfDay, charCountChange: 5*CHARS_PER_MINUTE, type: 'AutoCompletion', filename: 'file1.ts', extension: '.ts', language: 'TypeScript', repository: 'repo1', branch: 'main' },
+            { timestamp: startOfDay, charCountChange: 15*CHARS_PER_MINUTE, type: 'AutoCompletion', filename: 'file2.js', extension: '.js', language: 'JavaScript', repository: 'repo2', branch: 'feature' },
+            { timestamp: startOfDay, charCountChange: 25*CHARS_PER_MINUTE, type: 'AutoCompletion', filename: 'file3.py', extension: '.py', language: 'Python', repository: 'repo3', branch: 'develop' },
+            { timestamp: startOfDay, charCountChange: 10*CHARS_PER_MINUTE, type: 'AutoCompletion', filename: 'file4.ts', extension: '.ts', language: 'TypeScript', repository: 'repo1', branch: 'main' },
+            { timestamp: startOfWeek, charCountChange: 30*CHARS_PER_MINUTE, type: 'AutoCompletion', filename: 'file2.js', extension: '.js', language: 'JavaScript', repository: 'repo2', branch: 'main' },
+            { timestamp: startOfWeek, charCountChange: 10*CHARS_PER_MINUTE, type: 'AutoCompletion', filename: 'file4.js', extension: '.ts', language: 'JavaScript', repository: 'repo2', branch: 'main' },
+            { timestamp: startOfMonth, charCountChange: 10*CHARS_PER_MINUTE, type: 'AutoCompletion', filename: 'file3.js', extension: '.py', language: 'JavaScript', repository: 'repo2', branch: 'main' },
+            { timestamp: startOfYear, charCountChange: 10*CHARS_PER_MINUTE, type: 'AutoCompletion', filename: 'file3.js', extension: '.py', language: 'JavaScript', repository: 'repo2', branch: 'main' },
         ];
 
         events.forEach(addAutoCompletionEvent);
@@ -47,13 +47,13 @@ suite('Stats Test Suite', () => {
 
     test('getTopRepositories should return top repositories correctly', async () => {
         const events: AutoCompletionEvent[] = [
-            { timestamp: startOfDay, autoCompletionCharCountChange: 5*CHARS_PER_MINUTE, filename: 'file1.ts', extension: '.ts', language: 'TypeScript', repository: 'repo1', branch: 'main' },
-            { timestamp: startOfDay, autoCompletionCharCountChange: 15*CHARS_PER_MINUTE, filename: 'file2.js', extension: '.js', language: 'JavaScript', repository: 'repo2', branch: 'feature' },
-            { timestamp: startOfDay, autoCompletionCharCountChange: 25*CHARS_PER_MINUTE, filename: 'file3.py', extension: '.py', language: 'Python', repository: 'repo3', branch: 'develop' },
-            { timestamp: startOfDay, autoCompletionCharCountChange: 10*CHARS_PER_MINUTE, filename: 'file4.ts', extension: '.ts', language: 'TypeScript', repository: 'repo1', branch: 'main' },
-            { timestamp: startOfWeek, autoCompletionCharCountChange: 30*CHARS_PER_MINUTE, filename: 'file2.js', extension: '.js', language: 'JavaScript', repository: 'repo2', branch: 'main' },
-            { timestamp: startOfWeek, autoCompletionCharCountChange: 10*CHARS_PER_MINUTE, filename: 'file4.js', extension: '.ts', language: 'JavaScript', repository: 'repo2', branch: 'main' },
-            { timestamp: startOfMonth, autoCompletionCharCountChange: 10*CHARS_PER_MINUTE, filename: 'file3.js', extension: '.py', language: 'JavaScript', repository: 'repo2', branch: 'main' },
+            { timestamp: startOfDay, charCountChange: 5*CHARS_PER_MINUTE, type: 'AutoCompletion', filename: 'file1.ts', extension: '.ts', language: 'TypeScript', repository: 'repo1', branch: 'main' },
+            { timestamp: startOfDay, charCountChange: 15*CHARS_PER_MINUTE, type: 'AutoCompletion', filename: 'file2.js', extension: '.js', language: 'JavaScript', repository: 'repo2', branch: 'feature' },
+            { timestamp: startOfDay, charCountChange: 25*CHARS_PER_MINUTE, type: 'AutoCompletion', filename: 'file3.py', extension: '.py', language: 'Python', repository: 'repo3', branch: 'develop' },
+            { timestamp: startOfDay, charCountChange: 10*CHARS_PER_MINUTE, type: 'AutoCompletion', filename: 'file4.ts', extension: '.ts', language: 'TypeScript', repository: 'repo1', branch: 'main' },
+            { timestamp: startOfWeek, charCountChange: 30*CHARS_PER_MINUTE, type: 'AutoCompletion', filename: 'file2.js', extension: '.js', language: 'JavaScript', repository: 'repo2', branch: 'main' },
+            { timestamp: startOfWeek, charCountChange: 10*CHARS_PER_MINUTE, type: 'AutoCompletion', filename: 'file4.js', extension: '.ts', language: 'JavaScript', repository: 'repo2', branch: 'main' },
+            { timestamp: startOfMonth, charCountChange: 10*CHARS_PER_MINUTE, type: 'AutoCompletion', filename: 'file3.js', extension: '.py', language: 'JavaScript', repository: 'repo2', branch: 'main' },
         ];
 
         events.forEach(addAutoCompletionEvent);
@@ -69,16 +69,16 @@ suite('Stats Test Suite', () => {
 
     test('getTopLanguages should return top languages correctly', async () => {
         const events: AutoCompletionEvent[] = [
-            { timestamp: startOfDay, autoCompletionCharCountChange: 5*CHARS_PER_MINUTE, filename: 'file1.ts', extension: '.ts', language: 'TypeScript', repository: 'repo1', branch: 'main' },
-            { timestamp: startOfDay, autoCompletionCharCountChange: 15*CHARS_PER_MINUTE, filename: 'file2.js', extension: '.js', language: 'JavaScript', repository: 'repo2', branch: 'feature' },
-            { timestamp: startOfDay, autoCompletionCharCountChange: 20*CHARS_PER_MINUTE, filename: 'file3.js', extension: '.js', language: 'JavaScript', repository: 'repo2', branch: 'main' },
-            { timestamp: startOfDay, autoCompletionCharCountChange: 10*CHARS_PER_MINUTE, filename: 'file4.js', extension: '.js', language: 'JavaScript', repository: 'repo3', branch: 'feature' },
-            { timestamp: startOfDay, autoCompletionCharCountChange: 25*CHARS_PER_MINUTE, filename: 'file3.py', extension: '.py', language: 'Python', repository: 'repo3', branch: 'develop' },
-            { timestamp: startOfDay, autoCompletionCharCountChange: 15*CHARS_PER_MINUTE, filename: 'file5.py', extension: '.py', language: 'Python', repository: 'repo1', branch: 'main' },
-            { timestamp: startOfDay, autoCompletionCharCountChange: 10*CHARS_PER_MINUTE, filename: 'file6.rs', extension: '.rs', language: 'Rust', repository: 'repo4', branch: 'main' },
-            { timestamp: startOfDay, autoCompletionCharCountChange: 20*CHARS_PER_MINUTE, filename: 'file7.go', extension: '.go', language: 'Go', repository: 'repo5', branch: 'feature' },
-            { timestamp: startOfDay, autoCompletionCharCountChange: 30*CHARS_PER_MINUTE, filename: 'file8.java', extension: '.java', language: 'Java', repository: 'repo2', branch: 'develop' },
-            { timestamp: startOfDay, autoCompletionCharCountChange: 25*CHARS_PER_MINUTE, filename: 'file9.cpp', extension: '.cpp', language: 'C++', repository: 'repo6', branch: 'main' }
+            { timestamp: startOfDay, charCountChange: 5*CHARS_PER_MINUTE, type: 'AutoCompletion', filename: 'file1.ts', extension: '.ts', language: 'TypeScript', repository: 'repo1', branch: 'main' },
+            { timestamp: startOfDay, charCountChange: 15*CHARS_PER_MINUTE, type: 'AutoCompletion', filename: 'file2.js', extension: '.js', language: 'JavaScript', repository: 'repo2', branch: 'feature' },
+            { timestamp: startOfDay, charCountChange: 20*CHARS_PER_MINUTE, type: 'AutoCompletion', filename: 'file3.js', extension: '.js', language: 'JavaScript', repository: 'repo2', branch: 'main' },
+            { timestamp: startOfDay, charCountChange: 10*CHARS_PER_MINUTE, type: 'AutoCompletion', filename: 'file4.js', extension: '.js', language: 'JavaScript', repository: 'repo3', branch: 'feature' },
+            { timestamp: startOfDay, charCountChange: 25*CHARS_PER_MINUTE, type: 'AutoCompletion', filename: 'file3.py', extension: '.py', language: 'Python', repository: 'repo3', branch: 'develop' },
+            { timestamp: startOfDay, charCountChange: 15*CHARS_PER_MINUTE, type: 'AutoCompletion', filename: 'file5.py', extension: '.py', language: 'Python', repository: 'repo1', branch: 'main' },
+            { timestamp: startOfDay, charCountChange: 10*CHARS_PER_MINUTE, type: 'AutoCompletion', filename: 'file6.rs', extension: '.rs', language: 'Rust', repository: 'repo4', branch: 'main' },
+            { timestamp: startOfDay, charCountChange: 20*CHARS_PER_MINUTE, type: 'AutoCompletion', filename: 'file7.go', extension: '.go', language: 'Go', repository: 'repo5', branch: 'feature' },
+            { timestamp: startOfDay, charCountChange: 30*CHARS_PER_MINUTE, type: 'AutoCompletion', filename: 'file8.java', extension: '.java', language: 'Java', repository: 'repo2', branch: 'develop' },
+            { timestamp: startOfDay, charCountChange: 25*CHARS_PER_MINUTE, type: 'AutoCompletion', filename: 'file9.cpp', extension: '.cpp', language: 'C++', repository: 'repo6', branch: 'main' }
         ];
 
         events.forEach(addAutoCompletionEvent);
@@ -101,13 +101,13 @@ suite('Stats Test Suite', () => {
         const oneHourAgo = new Date(now.getTime() - 1 * 60 * 60 * 1000);
         const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
 
-        addAutoCompletionEvent({ timestamp: now, autoCompletionCharCountChange: 100, filename: 'file1.ts', extension: '.ts', language: 'TypeScript', repository: 'repo1', branch: 'main' });
-        addAutoCompletionEvent({ timestamp: oneHourAgo, autoCompletionCharCountChange: 200, filename: 'file2.js', extension: '.js', language: 'JavaScript', repository: 'repo2', branch: 'feature' });
-        addAutoCompletionEvent({ timestamp: twoHoursAgo, autoCompletionCharCountChange: 300, filename: 'file3.py', extension: '.py', language: 'Python', repository: 'repo3', branch: 'develop' });
+        addAutoCompletionEvent({ timestamp: now, charCountChange: 100, type: 'AutoCompletion', filename: 'file1.ts', extension: '.ts', language: 'TypeScript', repository: 'repo1', branch: 'main' });
+        addAutoCompletionEvent({ timestamp: oneHourAgo, charCountChange: 200, type: 'AutoCompletion', filename: 'file2.js', extension: '.js', language: 'JavaScript', repository: 'repo2', branch: 'feature' });
+        addAutoCompletionEvent({ timestamp: twoHoursAgo, charCountChange: 300, type: 'AutoCompletion', filename: 'file3.py', extension: '.py', language: 'Python', repository: 'repo3', branch: 'develop' });
 
-        addHandWrittenEvent({ timestamp: now, handWrittenCharCountChange: 50, filename: 'file1.ts', extension: '.ts', language: 'TypeScript', repository: 'repo1', branch: 'main' });
-        addHandWrittenEvent({ timestamp: oneHourAgo, handWrittenCharCountChange: 75, filename: 'file2.js', extension: '.js', language: 'JavaScript', repository: 'repo2', branch: 'feature' });
-        addHandWrittenEvent({ timestamp: twoHoursAgo, handWrittenCharCountChange: 100, filename: 'file3.py', extension: '.py', language: 'Python', repository: 'repo3', branch: 'develop' });
+        addHandWrittenEvent({ timestamp: now, charCountChange: 50, type: 'HandWritten', filename: 'file1.ts', extension: '.ts', language: 'TypeScript', repository: 'repo1', branch: 'main' });
+        addHandWrittenEvent({ timestamp: oneHourAgo, charCountChange: 75, type: 'HandWritten', filename: 'file2.js', extension: '.js', language: 'JavaScript', repository: 'repo2', branch: 'feature' });
+        addHandWrittenEvent({ timestamp: twoHoursAgo, charCountChange: 100, type: 'HandWritten', filename: 'file3.py', extension: '.py', language: 'Python', repository: 'repo3', branch: 'develop' });
 
         const result = getRecentHourlyChartData(3, now);
 
