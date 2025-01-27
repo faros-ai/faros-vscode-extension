@@ -1,9 +1,9 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
-import { send } from "./sender";
+import { send, squash } from "./sender";
 import { farosConfig, updateConfig } from "./config";
-import { addAutoCompletionEvent, addHandWrittenEvent, clearAutoCompletionEventQueue, getAutoCompletionEventQueue, setContext } from "./state";
+import { addAutoCompletionEvent, addHandWrittenEvent, clearAutoCompletionEventQueue, clearHandWrittenEventQueue, getAutoCompletionEventQueue, getHandWrittenEventQueue, setContext } from "./state";
 import { getGitBranch, getGitRepoName } from "./git";
 import * as path from "path";
 import FarosPanel from "./panel";
@@ -18,11 +18,28 @@ let farosPanel: FarosPanel | null = null;
 
 // Function to check and log events every minute
 function checkAndLogEvents() {
-  if (getAutoCompletionEventQueue().length > 0) {
-    console.log("Sending autocompletion events:", getAutoCompletionEventQueue());
-    send(getAutoCompletionEventQueue());
+  const autoCompletionEvents = getAutoCompletionEventQueue();
+  if (autoCompletionEvents.length > 0) {
+    console.log("Sending autocompletion events:", autoCompletionEvents);
+    try {
+      send(autoCompletionEvents, 'AutoCompletion');
+    } catch (error) {
+      console.error("Error sending autocompletion events:", error);
+    }
     // Clear the events after logging
     clearAutoCompletionEventQueue();
+  }
+
+  const handWrittenEvents = getHandWrittenEventQueue();
+  if (handWrittenEvents.length > 0) {
+    console.log("Sending hand written events:", handWrittenEvents);
+    try {
+      send(squash(handWrittenEvents), 'HandWritten');
+    } catch (error) {
+      console.error("Error sending hand written events:", error);
+    }
+    // Clear the events after logging
+    clearHandWrittenEventQueue();
   }
 }
 
@@ -98,7 +115,8 @@ function registerSuggestionListener() {
         // Store the event in memory
         addAutoCompletionEvent({
           timestamp: new Date(),
-          autoCompletionCharCountChange: currentLengthChange,
+          charCountChange: currentLengthChange,
+          type: 'AutoCompletion',
           filename: activeEditor.document.fileName,
           extension: path.extname(activeEditor.document.fileName),
           language: activeEditor.document.languageId,
@@ -110,7 +128,8 @@ function registerSuggestionListener() {
       } else if (changeType === TextChangeType.HandWrittenChar) {
         addHandWrittenEvent({
           timestamp: new Date(),
-          handWrittenCharCountChange: 1,
+          charCountChange: 1,
+          type: 'HandWritten',
           filename: activeEditor.document.fileName,
           extension: path.extname(activeEditor.document.fileName),
           language: activeEditor.document.languageId,

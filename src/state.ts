@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { AutoCompletionEvent, DocumentChangeEvent, HandWrittenEvent, HourlyAggregate, Summarization } from './types';
 
 const AUTOCOMPLETION_EVENTS_KEY = 'autocompletionEvents';
+const HANDWRITTEN_EVENTS_KEY = 'handwrittenEvents';
 const HOURLY_AGGREGATE_PREFIX = 'aggregate: ';
 const TOTAL_AGGREGATE_KEY = 'total';
 
@@ -12,6 +13,7 @@ export const setContext = (c: vscode.ExtensionContext) => {
 };
 
 export const getAutoCompletionEventQueue = (): AutoCompletionEvent[] => context.globalState.get<AutoCompletionEvent[]>(AUTOCOMPLETION_EVENTS_KEY, []);
+export const getHandWrittenEventQueue = (): HandWrittenEvent[] => context.globalState.get<HandWrittenEvent[]>(HANDWRITTEN_EVENTS_KEY, []);
 
 const hourToKey = (hour: number) => `${HOURLY_AGGREGATE_PREFIX}${hour}`;
 
@@ -85,11 +87,22 @@ export const addAutoCompletionEvent = (event: AutoCompletionEvent) => {
     queue.push(event);
     context.globalState.update(AUTOCOMPLETION_EVENTS_KEY, queue);
 
-    // Add to history
-    addDocumentChangeEvent(event);
+    try {
+        // Add to history
+        // This is wrapped in a try/catch for cases where we changed the event type and there's an error
+        // when serializing/deserializing the event in between versions
+        addDocumentChangeEvent(event);
+    } catch (error) {
+        console.error("Error adding auto completion event:", error);
+    }
 };
 
 export const addHandWrittenEvent = (event: HandWrittenEvent) => {
+    // Add to event to queue
+    const queue: HandWrittenEvent[] = getHandWrittenEventQueue();
+    queue.push(event);
+    context.globalState.update(HANDWRITTEN_EVENTS_KEY, queue);
+
     // Add to history
     addDocumentChangeEvent(event);
 };
@@ -107,9 +120,9 @@ const addDocumentChangeEvent = (event: DocumentChangeEvent) => {
     };
 
     const change = {
-        autoCompletionEventCount: event.autoCompletionCharCountChange ? 1 : 0,
-        autoCompletionCharCount: event.autoCompletionCharCountChange || 0,
-        handWrittenCharCount: event.handWrittenCharCountChange || 0,
+        autoCompletionEventCount: event.type === 'AutoCompletion' ? 1 : 0,
+        autoCompletionCharCount: event.type === 'AutoCompletion' ? event.charCountChange : 0,
+        handWrittenCharCount: event.type === 'HandWritten' ? event.charCountChange : 0,
     };
 
     aggregate.totals = updateSummarization(aggregate.totals, change);
@@ -138,4 +151,8 @@ const addDocumentChangeEvent = (event: DocumentChangeEvent) => {
 
 export const clearAutoCompletionEventQueue = () => {
     context.globalState.update(AUTOCOMPLETION_EVENTS_KEY, []);
+};
+
+export const clearHandWrittenEventQueue = () => {
+    context.globalState.update(HANDWRITTEN_EVENTS_KEY, []);
 };

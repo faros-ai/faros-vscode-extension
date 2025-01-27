@@ -1,7 +1,7 @@
 export type DocumentChangeEvent = {
   timestamp: Date;
-  autoCompletionCharCountChange?: number;
-  handWrittenCharCountChange?: number;
+  charCountChange: number;
+  type: 'AutoCompletion' | 'HandWritten';
   filename?: string;
   extension?: string;
   language?: string;
@@ -10,11 +10,11 @@ export type DocumentChangeEvent = {
 };
 
 export type AutoCompletionEvent = DocumentChangeEvent & {
-  autoCompletionCharCountChange: number;
+  type: 'AutoCompletion';
 };
 
 export type HandWrittenEvent = DocumentChangeEvent & {
-  handWrittenCharCountChange: number;
+  type: 'HandWritten';
 };
 
 export type Summarization = {

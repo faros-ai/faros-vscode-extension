@@ -4,12 +4,12 @@ import {
   Mutation,
   QueryBuilder,
 } from "faros-js-client";
-import { AutoCompletionEvent } from "./types";
+import { DocumentChangeEvent } from "./types";
 import { farosConfig } from "./config";
-import { config } from "process";
 
 async function* mutations(
-  events: AutoCompletionEvent[]
+  events: DocumentChangeEvent[],
+  category: string
 ): AsyncGenerator<Mutation> {
   // The QueryBuilder manages the origin for you
   const qb = new QueryBuilder(farosConfig.origin());
@@ -24,7 +24,7 @@ async function* mutations(
   const vcs_UserTool = {
     tool: 
     {
-        category: "AutoCompletion"
+        category
     },
     user: qb.ref({ vcs_User }),
   };
@@ -62,7 +62,7 @@ async function* mutations(
     const vcs_UserToolUsage = {
       usedAt: event.timestamp instanceof Date ? event.timestamp.toISOString() : event.timestamp,
       userTool: qb.ref({ vcs_UserTool }),
-      charactersAdded: event.autoCompletionCharCountChange,
+      charactersAdded: event.charCountChange,
     };
 
     if (vcs_Repository) {
@@ -84,7 +84,7 @@ async function sendToFaros(
   graph: string,
   batch: Mutation[]
 ): Promise<void> {
-  console.log(`Sending...`);
+  console.log(`Sending ${batch.length} mutations to Faros API...`);
   await faros.sendMutations(graph, batch);
   console.log(`Done.`);
 }
@@ -93,7 +93,7 @@ async function sendToWebhook(
   webhook: string,
   batch: Mutation[]
 ): Promise<void> {
-  console.log(`Sending...`);
+  console.log(`Sending ${batch.length} mutations to webhook ${webhook}...`);
   await fetch(webhook, {
     method: "POST",
     headers: {
@@ -107,7 +107,29 @@ async function debug(batch: Mutation[]): Promise<void> {
   console.log(batchMutation(batch));
 }
 
-export async function send(events: AutoCompletionEvent[]): Promise<void> {
+export function squash(events: DocumentChangeEvent[]): DocumentChangeEvent[] {
+  const squashed: { [key: string]: DocumentChangeEvent } = {};
+
+  for (const event of events) {
+    // Create key using minute-level timestamp and filename
+    const minute = new Date(event.timestamp);
+    minute.setSeconds(0);
+    minute.setMilliseconds(0);
+    const key = `${minute.getTime()}_${event.filename || ''}`;
+
+    if (!squashed[key]) {
+      // First event for this minute/file, copy it
+      squashed[key] = { ...event };
+    } else {
+      // Add counts to existing event
+      squashed[key].charCountChange = (squashed[key].charCountChange || 0) + event.charCountChange;
+    }
+  }
+
+  return Object.values(squashed);
+}
+
+export async function send(events: DocumentChangeEvent[], category: string): Promise<void> {
   let sendFn;
   if (farosConfig.webhook() !== '') {
     sendFn = (batch: Mutation[]) => sendToWebhook(farosConfig.webhook(), batch);
@@ -123,7 +145,7 @@ export async function send(events: AutoCompletionEvent[]): Promise<void> {
 
   let batchNum = 1;
   let batch: Mutation[] = [];
-  for await (const mutation of mutations(events)) {
+  for await (const mutation of mutations(events, category)) {
     if (batch.length >= farosConfig.batchSize()) {
       console.log(`------ Batch ${batchNum} - Size: ${batch.length} ------`);
       await sendFn(batch);
