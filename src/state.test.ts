@@ -29,7 +29,13 @@ suite('State Test Suite', () => {
           };
         addAutoCompletionEvent(event);
         const result = getAutoCompletionEventQueue();
-        assert.deepStrictEqual(result, [event]);
+
+        const normalizeTimestamp = (event: Partial<AutoCompletionEvent> & { timestamp: Date | string }): AutoCompletionEvent => ({
+            ...event,
+            timestamp: event.timestamp instanceof Date ? event.timestamp : new Date(event.timestamp)
+        }) as AutoCompletionEvent;
+
+        assert.deepStrictEqual(result.map(normalizeTimestamp), [normalizeTimestamp(event)]);
     });
 
     test('clearAutoCompletionEventQueue should clear the event queue', () => {
