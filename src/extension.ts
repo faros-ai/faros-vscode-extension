@@ -97,8 +97,6 @@ function registerSuggestionListener(context: vscode.ExtensionContext) {
       const updatedText = document.getText();
       const changeType = classifyTextChange(event, updatedText, previousText);
 
-      // console.log(`${new Date().toISOString()} changeTextDocumentListener ${changeType}`, event);
-
       if (changeType === TextChangeType.AutoCompletion) {
         for (const change of event.contentChanges) {
           const currentLengthChange = change.text.replace(/\s/g, "").length;
