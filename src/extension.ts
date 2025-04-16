@@ -98,11 +98,11 @@ function registerSuggestionListener(context: vscode.ExtensionContext) {
       const changeType = classifyTextChange(event, updatedText, previousText);
 
       if (changeType === TextChangeType.AutoCompletion) {
-        for (const change of event.contentChanges) {
-          const currentLengthChange = change.text.replace(/\s/g, "").length;
-          suggestionsCount++;
-          charCount += currentLengthChange;
-        }
+        const currentLengthChange = event.contentChanges.reduce(
+          (acc, change) => acc + change.text.replace(/\s/g, "").length, 0
+        );
+        suggestionsCount++;
+        charCount += currentLengthChange;
         statusBarItem.text =
           "Auto-completions: " +
           suggestionsCount +
@@ -113,7 +113,7 @@ function registerSuggestionListener(context: vscode.ExtensionContext) {
         // Store the event in memory
         addAutoCompletionEvent({
           timestamp: new Date(),
-          charCountChange: charCount,
+          charCountChange: currentLengthChange,
           type: 'AutoCompletion',
           filename: document.fileName,
           extension: path.extname(document.fileName),
