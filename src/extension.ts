@@ -13,7 +13,7 @@ let changeTextDocumentListener: vscode.Disposable | null = null;
 let themeChangedListener: vscode.Disposable | null = null;
 let suggestionsCount = 0;
 let charCount = 0;
-let previousText = "";
+let previousText: {[file: string]: string} = {};
 let farosPanel: FarosPanel | null = null;
 
 // Function to check and log events every minute
@@ -47,15 +47,15 @@ function checkAndLogEvents() {
 setInterval(checkAndLogEvents, farosConfig.batchInterval());
 
 export enum TextChangeType {
-  Undo,
-  Redo,
-  NoChange,
-  Deletion,
-  HandWrittenChar,
-  Space,
-  AutoCloseBracket,
-  AutoCompletion,
-  Unknown
+  Undo = "UNDO",
+  Redo = "REDO",
+  NoChange = "NO_CHANGE",
+  Deletion = "DELETION",
+  HandWrittenChar = "HAND_WRITTEN_CHAR",
+  Space = "SPACE",
+  AutoCloseBracket = "AUTO_CLOSE_BRACKET",
+  AutoCompletion = "AUTO_COMPLETION",
+  Unknown = "UNKNOWN"
 }
 
 export function classifyTextChange(event: vscode.TextDocumentChangeEvent, updatedText: string, previousText: string): TextChangeType {
@@ -80,7 +80,7 @@ export function classifyTextChange(event: vscode.TextDocumentChangeEvent, update
   }
 }
 
-function registerSuggestionListener() {
+function registerSuggestionListener(context: vscode.ExtensionContext) {
   if (!statusBarItem) {
     statusBarItem = vscode.window.createStatusBarItem(
       vscode.StatusBarAlignment.Right,
@@ -93,16 +93,16 @@ function registerSuggestionListener() {
 
   if (changeTextDocumentListener === null) {
     changeTextDocumentListener = vscode.workspace.onDidChangeTextDocument((event) => {
-      const activeEditor = vscode.window.activeTextEditor;
-      if (!activeEditor || event.document !== activeEditor.document) {
-        return;
-      }
-      const updatedText = activeEditor.document.getText();
-      const changeType = classifyTextChange(event, updatedText, previousText);
+      const document = event.document;
+      const filename = document.fileName;
+      const updatedText = document.getText();
+      const changeType = classifyTextChange(event, updatedText, previousText[filename] ?? '');
 
       if (changeType === TextChangeType.AutoCompletion) {
-        const currentLengthChange = event.contentChanges[0].text.replace(/\s/g, "").length;
-
+        console.log(`${new Date().toISOString()} ${filename} ${changeType}`);
+        const currentLengthChange = event.contentChanges.reduce(
+          (acc, change) => acc + change.text.replace(/\s/g, "").length, 0
+        );
         suggestionsCount++;
         charCount += currentLengthChange;
         statusBarItem.text =
@@ -117,37 +117,40 @@ function registerSuggestionListener() {
           timestamp: new Date(),
           charCountChange: currentLengthChange,
           type: 'AutoCompletion',
-          filename: activeEditor.document.fileName,
-          extension: path.extname(activeEditor.document.fileName),
-          language: activeEditor.document.languageId,
-          repository: getGitRepoName(activeEditor.document.fileName),
-          branch: getGitBranch(activeEditor.document.fileName),
+          filename,
+          extension: path.extname(filename),
+          language: document.languageId,
+          repository: getGitRepoName(filename),
+          branch: getGitBranch(filename),
         });
 
         farosPanel?.refresh();
       } else if (changeType === TextChangeType.HandWrittenChar) {
+        console.log(`${new Date().toISOString()} ${filename} ${changeType}`);
         addHandWrittenEvent({
           timestamp: new Date(),
           charCountChange: 1,
           type: 'HandWritten',
-          filename: activeEditor.document.fileName,
-          extension: path.extname(activeEditor.document.fileName),
-          language: activeEditor.document.languageId,
-          repository: getGitRepoName(activeEditor.document.fileName),
-          branch: getGitBranch(activeEditor.document.fileName),
+          filename,
+          extension: path.extname(filename),
+          language: document.languageId,
+          repository: getGitRepoName(filename),
+          branch: getGitBranch(filename),
         });
 
         farosPanel?.refresh();
       }
 
-      previousText = updatedText;
+      previousText[filename] = updatedText;
     });
+    context.subscriptions.push(changeTextDocumentListener);
   }
 
   if (themeChangedListener === null) {
     themeChangedListener = vscode.window.onDidChangeActiveColorTheme((event) => {
       farosPanel?.updateTheme();
     });
+    context.subscriptions.push(themeChangedListener);
   }
 }
 
@@ -156,10 +159,10 @@ function registerSuggestionListener() {
 export function activate(context: vscode.ExtensionContext) {
   // Use the console to output diagnostic information (console.log) and errors (console.error)
   // This line of code will only be executed once when your extension is activated
-  console.log("Faros VSCode extension is now active!");
+  console.log("Faros VSCode extension activate started!");
   setContext(context);
   updateConfig();
-  registerSuggestionListener();
+  registerSuggestionListener(context);
 
   farosPanel = new FarosPanel(context.extensionUri);
   context.subscriptions.push(
@@ -171,11 +174,10 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Set context as a global as some tests depend on it
   (global as any).testExtensionContext = context;
+  console.log("Faros VSCode extension activate finished!");
 }
 
 // This method is called when your extension is deactivated
 export function deactivate() {
   console.log("Faros VSCode extension is now inactive!");
 }
-
-
