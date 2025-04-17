@@ -13,7 +13,7 @@ let changeTextDocumentListener: vscode.Disposable | null = null;
 let themeChangedListener: vscode.Disposable | null = null;
 let suggestionsCount = 0;
 let charCount = 0;
-let previousText = "";
+let previousText: {[file: string]: string} = {};
 let farosPanel: FarosPanel | null = null;
 
 // Function to check and log events every minute
@@ -94,10 +94,12 @@ function registerSuggestionListener(context: vscode.ExtensionContext) {
   if (changeTextDocumentListener === null) {
     changeTextDocumentListener = vscode.workspace.onDidChangeTextDocument((event) => {
       const document = event.document;
+      const filename = document.fileName;
       const updatedText = document.getText();
-      const changeType = classifyTextChange(event, updatedText, previousText);
+      const changeType = classifyTextChange(event, updatedText, previousText[filename] ?? '');
 
       if (changeType === TextChangeType.AutoCompletion) {
+        console.log(`${new Date().toISOString()} ${filename} ${changeType}`);
         const currentLengthChange = event.contentChanges.reduce(
           (acc, change) => acc + change.text.replace(/\s/g, "").length, 0
         );
@@ -115,30 +117,31 @@ function registerSuggestionListener(context: vscode.ExtensionContext) {
           timestamp: new Date(),
           charCountChange: currentLengthChange,
           type: 'AutoCompletion',
-          filename: document.fileName,
-          extension: path.extname(document.fileName),
+          filename,
+          extension: path.extname(filename),
           language: document.languageId,
-          repository: getGitRepoName(document.fileName),
-          branch: getGitBranch(document.fileName),
+          repository: getGitRepoName(filename),
+          branch: getGitBranch(filename),
         });
 
         farosPanel?.refresh();
       } else if (changeType === TextChangeType.HandWrittenChar) {
+        console.log(`${new Date().toISOString()} ${filename} ${changeType}`);
         addHandWrittenEvent({
           timestamp: new Date(),
           charCountChange: 1,
           type: 'HandWritten',
-          filename: document.fileName,
-          extension: path.extname(document.fileName),
+          filename,
+          extension: path.extname(filename),
           language: document.languageId,
-          repository: getGitRepoName(document.fileName),
-          branch: getGitBranch(document.fileName),
+          repository: getGitRepoName(filename),
+          branch: getGitBranch(filename),
         });
 
         farosPanel?.refresh();
       }
 
-      previousText = updatedText;
+      previousText[filename] = updatedText;
     });
     context.subscriptions.push(changeTextDocumentListener);
   }
