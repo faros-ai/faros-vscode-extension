@@ -2,7 +2,7 @@
   "name": "faros-vscode-extension",
   "displayName": "Faros AI",
   "description": "Faros AI's Visual Studio Code extension",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "publisher": "farosai",
   "icon": "images/logo.png",
   "engines": {
@@ -154,5 +154,8 @@
     "framer-motion": "^11.11.9",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
+  },
+  "overrides": {
+    "form-data": "4.0.4"
   }
 }
