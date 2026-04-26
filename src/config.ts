@@ -1,11 +1,43 @@
 import * as vscode from "vscode";
-
-const config = vscode.workspace.getConfiguration('faros');
-
 import * as fs from 'fs';
 import * as path from 'path';
 import { createHash, randomUUID } from "crypto";
 import { getGitUserEmail, getGitUserName } from "./git";
+
+const config = vscode.workspace.getConfiguration('faros');
+const CONFIG_FILE_KEYS = new Set(['webhook', 'webhookSecret']);
+
+function configPath(): string {
+  return path.join(
+    process.env.HOME || process.env.USERPROFILE || '',
+    '.vscode',
+    'extensions',
+    'farosai',
+    '.config.json'
+  );
+}
+
+function fileConfig(): Record<string, unknown> {
+  const filepath = configPath();
+  if (!fs.existsSync(filepath)) {
+    return {};
+  }
+  try {
+    return JSON.parse(fs.readFileSync(filepath, 'utf8'));
+  } catch (error) {
+    console.error('Error reading Faros config file:', error);
+    return {};
+  }
+}
+
+function configValue(key: string): string {
+  const value = fileConfig()[key];
+  if (typeof value === 'string' && value) {
+    return value;
+  }
+  const configured = config.get<string>(key);
+  return configured || '';
+}
 
 export interface FarosConfig {
   apiKey: () => string;
@@ -18,6 +50,7 @@ export interface FarosConfig {
   batchSize: () => number;
   batchInterval: () => number;
   webhook: () => string;
+  webhookSecret: () => string;
   autoCompletionCategory: () => string;
   handWrittenCategory: () => string;
   userSource: () => string;
@@ -40,36 +73,34 @@ export const farosConfig: FarosConfig = {
   origin: () => config.get('origin') || 'faros-vscode-extension',
   batchSize: () => config.get('batchSize') || 500,
   batchInterval: () => Number(config.get('batchInterval')) || 60000,
-  webhook: () => config.get('webhook') || '',
+  webhook: () => configValue('webhook'),
+  webhookSecret: () => configValue('webhookSecret'),
   autoCompletionCategory: () => config.get('autoCompletionCategory') || 'AutoCompletion',
   handWrittenCategory: () => config.get('handWrittenCategory') || 'HandWritten',
   userSource: () => config.get('userSource') || 'vscode-extension',
 };
 
-export function updateConfig(): void {
-  const configPath = path.join(process.env.HOME || process.env.USERPROFILE || '', '.vscode', 'extensions', 'farosai', '.config.json');
-
-  if (fs.existsSync(configPath)) {
-    try {
-      const fileConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-      Object.entries(fileConfig).forEach(([key, value]) => {
-        console.log('Updating config:', key, value);
-        config.update(key, value, vscode.ConfigurationTarget.Global);
-      });
-    } catch (error) {
-      console.error('Error reading .faros-config.json:', error);
+export async function updateConfig(): Promise<void> {
+  const values = fileConfig();
+  if (Object.keys(values).length > 0) {
+    for (const [key, value] of Object.entries(values)) {
+      if (CONFIG_FILE_KEYS.has(key)) {
+        continue;
+      }
+      console.log('Updating config:', key, value);
+      await config.update(key, value, vscode.ConfigurationTarget.Global);
     }
   }
   if (farosConfig.vcsName() === '') {
-    config.update('vcsName', getGitUserName() || '', vscode.ConfigurationTarget.Global);
+    await config.update('vcsName', getGitUserName() || '', vscode.ConfigurationTarget.Global);
   }
   if (farosConfig.vcsEmail() === '') {
-    config.update('vcsEmail', getGitUserEmail() || '', vscode.ConfigurationTarget.Global);
+    await config.update('vcsEmail', getGitUserEmail() || '', vscode.ConfigurationTarget.Global);
   }
   if (farosConfig.vcsUid(false) === '') {
     const hash = createHash('sha256');
     hash.update(farosConfig.vcsName() || farosConfig.vcsEmail() || randomUUID());
     const vcsUid = hash.digest('hex').substring(0, 8) || randomUUID();
-    config.update('vcsUid', vcsUid, vscode.ConfigurationTarget.Global);
+    await config.update('vcsUid', vcsUid, vscode.ConfigurationTarget.Global);
   }
 }

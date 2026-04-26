@@ -4,6 +4,7 @@ import {
   Mutation,
   QueryBuilder,
 } from "faros-js-client";
+import { createHmac } from "crypto";
 import { DocumentChangeEvent } from "./types";
 import { farosConfig } from "./config";
 
@@ -95,12 +96,19 @@ async function sendToWebhook(
   batch: Mutation[]
 ): Promise<void> {
   console.log(`Sending ${batch.length} mutations to webhook ${webhook}...`);
+  const body = JSON.stringify({ query: batchMutation(batch) });
+  const webhookSecret = farosConfig.webhookSecret();
+  if (!webhookSecret) {
+    throw new Error("faros.webhookSecret is required when faros.webhook is configured");
+  }
+  const signature = createHmac("sha256", webhookSecret).update(body).digest("hex");
   await fetch(webhook, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "X-Faros-Signature": `sha256=${signature}`,
     },
-    body: JSON.stringify({ query: batchMutation(batch) }),
+    body,
   });
 }
 
