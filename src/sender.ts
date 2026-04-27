@@ -8,6 +8,20 @@ import { createHmac } from "crypto";
 import { DocumentChangeEvent } from "./types";
 import { farosConfig } from "./config";
 
+export function signedWebhookHeaders(
+  body: string,
+  webhookSecret: string,
+  timestamp = Math.floor(Date.now() / 1000).toString()
+): Record<string, string> {
+  const signedPayload = `${timestamp}.${body}`;
+  const signature = createHmac("sha256", webhookSecret).update(signedPayload).digest("hex");
+  return {
+    "Content-Type": "application/json",
+    "X-Faros-Timestamp": timestamp,
+    "X-Faros-Signature": `sha256=${signature}`,
+  };
+}
+
 async function* mutations(
   events: DocumentChangeEvent[],
   category: string
@@ -101,13 +115,9 @@ async function sendToWebhook(
   if (!webhookSecret) {
     throw new Error("faros.webhookSecret is required when faros.webhook is configured");
   }
-  const signature = createHmac("sha256", webhookSecret).update(body).digest("hex");
   await fetch(webhook, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Faros-Signature": `sha256=${signature}`,
-    },
+    headers: signedWebhookHeaders(body, webhookSecret),
     body,
   });
 }

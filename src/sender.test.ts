@@ -1,6 +1,24 @@
 import * as assert from 'assert';
-import { squash } from './sender';
+import { createHmac } from 'crypto';
+import { signedWebhookHeaders, squash } from './sender';
 import { DocumentChangeEvent } from './types';
+
+suite('signedWebhookHeaders', () => {
+  test('signs timestamp and body together', () => {
+    const body = '{"query":"mutation { insert_vcs_User_one { id } }"}';
+    const secret = 'test-secret';
+    const timestamp = '1777132800';
+    const expectedSignature = createHmac('sha256', secret)
+      .update(`${timestamp}.${body}`)
+      .digest('hex');
+
+    assert.deepStrictEqual(signedWebhookHeaders(body, secret, timestamp), {
+      'Content-Type': 'application/json',
+      'X-Faros-Timestamp': timestamp,
+      'X-Faros-Signature': `sha256=${expectedSignature}`,
+    });
+  });
+});
 
 suite('squash', () => {
   test('should combine events in the same minute for the same file', () => {

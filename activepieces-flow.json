@@ -15,7 +15,7 @@
       "type": "PIECE_TRIGGER",
       "settings": {
         "pieceName": "@activepieces/piece-webhook",
-        "pieceVersion": "0.1.10",
+        "pieceVersion": "0.1.32",
         "pieceType": "OFFICIAL",
         "packageType": "REGISTRY",
         "input": {
@@ -25,7 +25,9 @@
             "hmacSecret": "<webhook-secret>",
             "hmacAlgorithm": "sha256",
             "hmacEncoding": "hex",
-            "hmacSignaturePrefix": "sha256="
+            "hmacSignaturePrefix": "sha256=",
+            "hmacTimestampHeaderName": "x-faros-timestamp",
+            "hmacTimestampToleranceSeconds": "300"
           }
         },
         "inputUiInfo": {
