@@ -35,8 +35,45 @@ function configValue(key: string): string {
   if (typeof value === 'string' && value) {
     return value;
   }
+  if (CONFIG_FILE_KEYS.has(key)) {
+    return '';
+  }
   const configured = config.get<string>(key);
   return configured || '';
+}
+
+function writeProtectedConfig(values: Record<string, unknown>): void {
+  const filepath = configPath();
+  const dir = path.dirname(filepath);
+  fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+  fs.chmodSync(dir, 0o700);
+  fs.writeFileSync(filepath, JSON.stringify(values, null, 2), { mode: 0o600 });
+  fs.chmodSync(filepath, 0o600);
+}
+
+function migrateProtectedConfigKeys(): void {
+  const values = fileConfig();
+  const updatedValues = { ...values };
+  let shouldWrite = false;
+
+  for (const key of CONFIG_FILE_KEYS) {
+    if (typeof updatedValues[key] === 'string' && updatedValues[key]) {
+      continue;
+    }
+    const configured = config.get<string>(key);
+    if (configured) {
+      updatedValues[key] = configured;
+      shouldWrite = true;
+    }
+  }
+
+  if (shouldWrite) {
+    try {
+      writeProtectedConfig(updatedValues);
+    } catch (error) {
+      console.error('Error migrating Faros protected config:', error);
+    }
+  }
 }
 
 export interface FarosConfig {
@@ -61,7 +98,9 @@ export const farosConfig: FarosConfig = {
   vcsUid: (update = true) => {
     if (config.get('vcsUid') === undefined || config.get('vcsUid') === '') {
       if (update) {
-        updateConfig();
+        void updateConfig().catch((error) => {
+          console.error('Error updating Faros config:', error);
+        });
       }
     }
     return config.get('vcsUid') || '';
@@ -81,13 +120,14 @@ export const farosConfig: FarosConfig = {
 };
 
 export async function updateConfig(): Promise<void> {
+  migrateProtectedConfigKeys();
   const values = fileConfig();
   if (Object.keys(values).length > 0) {
     for (const [key, value] of Object.entries(values)) {
       if (CONFIG_FILE_KEYS.has(key)) {
         continue;
       }
-      console.log('Updating config:', key, value);
+      console.log('Updating config:', key);
       await config.update(key, value, vscode.ConfigurationTarget.Global);
     }
   }

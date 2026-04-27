@@ -109,17 +109,23 @@ async function sendToWebhook(
   webhook: string,
   batch: Mutation[]
 ): Promise<void> {
-  console.log(`Sending ${batch.length} mutations to webhook ${webhook}...`);
+  console.log(`Sending ${batch.length} mutations to configured Faros webhook...`);
   const body = JSON.stringify({ query: batchMutation(batch) });
   const webhookSecret = farosConfig.webhookSecret();
   if (!webhookSecret) {
     throw new Error("faros.webhookSecret is required when faros.webhook is configured");
   }
-  await fetch(webhook, {
+  const response = await fetch(webhook, {
     method: "POST",
     headers: signedWebhookHeaders(body, webhookSecret),
     body,
   });
+  if (!response.ok) {
+    const responseBody = await response.text().catch(() => '');
+    throw new Error(
+      `Faros webhook request failed: ${response.status} ${response.statusText}${responseBody ? `: ${responseBody}` : ''}`
+    );
+  }
 }
 
 async function debug(batch: Mutation[]): Promise<void> {
