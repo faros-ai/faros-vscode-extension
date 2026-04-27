@@ -2,7 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
 import { send, squash } from "./sender";
-import { farosConfig, updateConfig } from "./config";
+import { farosConfig, setProtectedConfigStorageUri, updateConfig } from "./config";
 import { addAutoCompletionEvent, addHandWrittenEvent, clearAutoCompletionEventQueue, clearHandWrittenEventQueue, getAutoCompletionEventQueue, getHandWrittenEventQueue, setContext } from "./state";
 import { getGitBranch, getGitRepoName } from "./git";
 import * as path from "path";
@@ -160,6 +160,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   // Use the console to output diagnostic information (console.log) and errors (console.error)
   // This line of code will only be executed once when your extension is activated
   console.log("Faros VSCode extension activate started!");
+  setProtectedConfigStorageUri(context.globalStorageUri);
   setContext(context);
   await updateConfig();
   registerSuggestionListener(context);

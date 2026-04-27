@@ -6,8 +6,9 @@ import { getGitUserEmail, getGitUserName } from "./git";
 
 const config = vscode.workspace.getConfiguration('faros');
 const CONFIG_FILE_KEYS = new Set(['webhook', 'webhookSecret']);
+let protectedConfigPath: string | undefined;
 
-function configPath(): string {
+function legacyConfigPath(): string {
   return path.join(
     process.env.HOME || process.env.USERPROFILE || '',
     '.vscode',
@@ -17,8 +18,25 @@ function configPath(): string {
   );
 }
 
-function fileConfig(): Record<string, unknown> {
-  const filepath = configPath();
+export function setProtectedConfigStorageUri(storageUri: vscode.Uri): void {
+  protectedConfigPath = path.join(storageUri.fsPath, '.config.json');
+}
+
+function configPath(): string {
+  return protectedConfigPath ?? legacyConfigPath();
+}
+
+function configPaths(): string[] {
+  return Array.from(
+    new Set(
+      protectedConfigPath
+        ? [protectedConfigPath, legacyConfigPath()]
+        : [legacyConfigPath()]
+    )
+  );
+}
+
+function readConfigFile(filepath: string): Record<string, unknown> {
   if (!fs.existsSync(filepath)) {
     return {};
   }
@@ -28,6 +46,16 @@ function fileConfig(): Record<string, unknown> {
     console.error('Error reading Faros config file:', error);
     return {};
   }
+}
+
+function fileConfig(): Record<string, unknown> {
+  for (const filepath of configPaths()) {
+    const values = readConfigFile(filepath);
+    if (Object.keys(values).length > 0) {
+      return values;
+    }
+  }
+  return {};
 }
 
 function configValue(key: string): string {
@@ -55,6 +83,11 @@ function migrateProtectedConfigKeys(): void {
   const values = fileConfig();
   const updatedValues = { ...values };
   let shouldWrite = false;
+  const shouldPromoteLegacyConfig = Boolean(
+    protectedConfigPath &&
+      !fs.existsSync(protectedConfigPath) &&
+      Object.keys(updatedValues).length > 0
+  );
 
   for (const key of CONFIG_FILE_KEYS) {
     if (typeof updatedValues[key] === 'string' && updatedValues[key]) {
@@ -67,7 +100,7 @@ function migrateProtectedConfigKeys(): void {
     }
   }
 
-  if (shouldWrite) {
+  if (shouldWrite || shouldPromoteLegacyConfig) {
     try {
       writeProtectedConfig(updatedValues);
     } catch (error) {
