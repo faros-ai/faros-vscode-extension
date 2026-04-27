@@ -79,7 +79,35 @@ function writeProtectedConfig(values: Record<string, unknown>): void {
   fs.chmodSync(filepath, 0o600);
 }
 
-function migrateProtectedConfigKeys(): void {
+async function clearProtectedConfigSettings(values: Record<string, unknown>): Promise<void> {
+  for (const key of CONFIG_FILE_KEYS) {
+    if (typeof values[key] === 'string' && values[key] && config.get<string>(key)) {
+      try {
+        await config.update(key, undefined, vscode.ConfigurationTarget.Global);
+      } catch (error) {
+        console.error('Error clearing migrated Faros config setting:', error);
+      }
+    }
+  }
+}
+
+function removeLegacyConfigFile(): void {
+  const legacyPath = legacyConfigPath();
+  if (
+    !protectedConfigPath ||
+    path.resolve(legacyPath) === path.resolve(protectedConfigPath) ||
+    !fs.existsSync(legacyPath)
+  ) {
+    return;
+  }
+  try {
+    fs.unlinkSync(legacyPath);
+  } catch (error) {
+    console.error('Error removing legacy Faros config file:', error);
+  }
+}
+
+async function migrateProtectedConfigKeys(): Promise<void> {
   const values = fileConfig();
   const updatedValues = { ...values };
   let shouldWrite = false;
@@ -105,7 +133,13 @@ function migrateProtectedConfigKeys(): void {
       writeProtectedConfig(updatedValues);
     } catch (error) {
       console.error('Error migrating Faros protected config:', error);
+      return;
     }
+  }
+
+  if (Object.keys(updatedValues).length > 0) {
+    await clearProtectedConfigSettings(updatedValues);
+    removeLegacyConfigFile();
   }
 }
 
@@ -153,7 +187,7 @@ export const farosConfig: FarosConfig = {
 };
 
 export async function updateConfig(): Promise<void> {
-  migrateProtectedConfigKeys();
+  await migrateProtectedConfigKeys();
   const values = fileConfig();
   if (Object.keys(values).length > 0) {
     for (const [key, value] of Object.entries(values)) {
