@@ -4,17 +4,15 @@ import { signedWebhookHeaders, squash } from './sender';
 import { DocumentChangeEvent } from './types';
 
 suite('signedWebhookHeaders', () => {
-  test('signs timestamp and body together', () => {
+  test('signs the exact webhook body', () => {
     const body = '{"query":"mutation { insert_vcs_User_one { id } }"}';
     const secret = 'test-secret';
-    const timestamp = '1777132800';
     const expectedSignature = createHmac('sha256', secret)
-      .update(`${timestamp}.${body}`)
+      .update(body)
       .digest('hex');
 
-    assert.deepStrictEqual(signedWebhookHeaders(body, secret, timestamp), {
+    assert.deepStrictEqual(signedWebhookHeaders(body, secret), {
       'Content-Type': 'application/json',
-      'X-Faros-Timestamp': timestamp,
       'X-Faros-Signature': `sha256=${expectedSignature}`,
     });
   });

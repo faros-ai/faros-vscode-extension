@@ -25,9 +25,7 @@
             "hmacSecret": "<webhook-secret>",
             "hmacAlgorithm": "sha256",
             "hmacEncoding": "hex",
-            "hmacSignaturePrefix": "sha256=",
-            "hmacTimestampHeaderName": "x-faros-timestamp",
-            "hmacTimestampToleranceSeconds": "300"
+            "hmacSignaturePrefix": "sha256="
           }
         },
         "inputUiInfo": {
@@ -42,7 +40,6 @@
         "valid": true,
         "settings": {
           "input": {
-            "auth": "{{connections['faros-api-key']}}",
             "graph": "default",
             "query": "{{trigger['body']['query']}}",
             "variables": {}
@@ -54,7 +51,7 @@
             "customizedInputs": {}
           },
           "packageType": "ARCHIVE",
-          "pieceVersion": "0.1.0",
+          "pieceVersion": "0.0.4",
           "errorHandlingOptions": {
             "retryOnFailure": {
               "value": false
