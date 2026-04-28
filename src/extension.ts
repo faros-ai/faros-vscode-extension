@@ -17,29 +17,27 @@ let previousText: {[file: string]: string} = {};
 let farosPanel: FarosPanel | null = null;
 
 // Function to check and log events every minute
-function checkAndLogEvents() {
+async function checkAndLogEvents() {
   const autoCompletionEvents = getAutoCompletionEventQueue();
   if (autoCompletionEvents.length > 0) {
     console.log("Sending autocompletion events:", autoCompletionEvents);
     try {
-      send(autoCompletionEvents, farosConfig.autoCompletionCategory());
+      await send(autoCompletionEvents, farosConfig.autoCompletionCategory());
+      clearAutoCompletionEventQueue();
     } catch (error) {
       console.error("Error sending autocompletion events:", error);
     }
-    // Clear the events after logging
-    clearAutoCompletionEventQueue();
   }
 
   const handWrittenEvents = getHandWrittenEventQueue();
   if (handWrittenEvents.length > 0) {
     console.log("Sending hand written events:", handWrittenEvents);
     try {
-      send(squash(handWrittenEvents), farosConfig.handWrittenCategory());
+      await send(squash(handWrittenEvents), farosConfig.handWrittenCategory());
+      clearHandWrittenEventQueue();
     } catch (error) {
       console.error("Error sending hand written events:", error);
     }
-    // Clear the events after logging
-    clearHandWrittenEventQueue();
   }
 }
 

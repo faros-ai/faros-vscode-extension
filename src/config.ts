@@ -26,16 +26,6 @@ function configPath(): string {
   return protectedConfigPath ?? legacyConfigPath();
 }
 
-function configPaths(): string[] {
-  return Array.from(
-    new Set(
-      protectedConfigPath
-        ? [protectedConfigPath, legacyConfigPath()]
-        : [legacyConfigPath()]
-    )
-  );
-}
-
 function readConfigFile(filepath: string): Record<string, unknown> {
   if (!fs.existsSync(filepath)) {
     return {};
@@ -48,14 +38,35 @@ function readConfigFile(filepath: string): Record<string, unknown> {
   }
 }
 
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.length > 0;
+}
+
+function protectedFileConfig(): Record<string, unknown> {
+  return protectedConfigPath ? readConfigFile(protectedConfigPath) : {};
+}
+
 function fileConfig(): Record<string, unknown> {
-  for (const filepath of configPaths()) {
-    const values = readConfigFile(filepath);
-    if (Object.keys(values).length > 0) {
-      return values;
+  const protectedValues = protectedFileConfig();
+  const legacyValues = readConfigFile(legacyConfigPath());
+  const values = {...legacyValues, ...protectedValues};
+
+  const legacyHasCompleteWebhookCredentials =
+    isNonEmptyString(legacyValues.webhook) && isNonEmptyString(legacyValues.webhookSecret);
+
+  // The installer writes the shared legacy path. A complete installer payload is
+  // authoritative so MDM reruns can rotate all hosts. Incomplete legacy data can
+  // only fill missing protected values, not overwrite a signed config.
+  for (const key of CONFIG_FILE_KEYS) {
+    if (
+      isNonEmptyString(legacyValues[key]) &&
+      (legacyHasCompleteWebhookCredentials || !isNonEmptyString(protectedValues[key]))
+    ) {
+      values[key] = legacyValues[key];
     }
   }
-  return {};
+
+  return values;
 }
 
 function configValue(key: string): string {
@@ -91,29 +102,13 @@ async function clearProtectedConfigSettings(values: Record<string, unknown>): Pr
   }
 }
 
-function removeLegacyConfigFile(): void {
-  const legacyPath = legacyConfigPath();
-  if (
-    !protectedConfigPath ||
-    path.resolve(legacyPath) === path.resolve(protectedConfigPath) ||
-    !fs.existsSync(legacyPath)
-  ) {
-    return;
-  }
-  try {
-    fs.unlinkSync(legacyPath);
-  } catch (error) {
-    console.error('Error removing legacy Faros config file:', error);
-  }
-}
-
 async function migrateProtectedConfigKeys(): Promise<void> {
+  const protectedValues = protectedFileConfig();
   const values = fileConfig();
   const updatedValues = { ...values };
   let shouldWrite = false;
   const shouldPromoteLegacyConfig = Boolean(
     protectedConfigPath &&
-      !fs.existsSync(protectedConfigPath) &&
       Object.keys(updatedValues).length > 0
   );
 
@@ -128,7 +123,13 @@ async function migrateProtectedConfigKeys(): Promise<void> {
     }
   }
 
-  if (shouldWrite || shouldPromoteLegacyConfig) {
+  for (const key of CONFIG_FILE_KEYS) {
+    if (isNonEmptyString(updatedValues[key]) && protectedValues[key] !== updatedValues[key]) {
+      shouldWrite = true;
+    }
+  }
+
+  if (protectedConfigPath && (shouldWrite || shouldPromoteLegacyConfig)) {
     try {
       writeProtectedConfig(updatedValues);
     } catch (error) {
@@ -139,7 +140,6 @@ async function migrateProtectedConfigKeys(): Promise<void> {
 
   if (Object.keys(updatedValues).length > 0) {
     await clearProtectedConfigSettings(updatedValues);
-    removeLegacyConfigFile();
   }
 }
 
