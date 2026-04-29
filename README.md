@@ -34,14 +34,24 @@ Download and install the Faros AI VSCode Extension from [the Visual Studio Code 
 * Enter 'Faros' in the search bar to get to Faros AI's extension settings
 * Enter your personal details in the `Vcs Name`, `Vcs Email`, and `Vcs Uid` fields
 * Configure how the extension will send data to Faros in one of two ways:
-  - Set a dedicated webhook url (see more on how to configure a webhook below)
-  - Set Faros API Key that the extension will use to directly post requests to Faros API
+  - Provision a dedicated signed webhook using the Faros installer-managed config file (see below)
+  - Set a Faros API key that the extension will use to directly post requests to the Faros API
 
 Once installed, the extension will automatically begin collecting auto-completion event data.
 
-## Setting up a dedicated webhook
-In Faros' workflows screen (Data control -> Workflows) create a new flow by importing [this](https://github.com/faros-ai/faros-vscode-extension/blob/3e24a2e263c26f6dc9c63c9d9155eb5845a66060/activepieces-flow.json) template json file. 
-Once imported, edit the `Send HTTP request` step and update its `authorization` header's value to be your Faros API key. Publish your flow and use its `Catch Webhook` live URL in your extension's webhook configuration.
+## Setting up a dedicated signed webhook
+In Faros' workflows screen (Data control -> Workflows) create a new flow by importing the bundled `activepieces-flow.json` template. The webhook trigger must use HMAC authentication with the same `webhookSecret` provisioned to the extension.
+
+Provision the extension with both values through the installer-managed config file:
+
+```json
+{
+  "webhook": "https://ap.prod.workflows.faros.ai/api/v1/webhooks/<webhook-id>",
+  "webhookSecret": "<webhook-secret>"
+}
+```
+
+The extension stores these webhook values in its protected local storage and does not read them from regular VS Code settings.
 
 # How It Works
 Once installed, the VSCode extension integrates seamlessly with your developers' workflow. Auto-completion events are captured and securely sent to the Faros AI platform, where leaders can analyze the data to make informed decisions about engineering performance and tool adoption.

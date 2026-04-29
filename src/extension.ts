@@ -2,7 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
 import { send, squash } from "./sender";
-import { farosConfig, updateConfig } from "./config";
+import { farosConfig, setProtectedConfigStorageUri, updateConfig } from "./config";
 import { addAutoCompletionEvent, addHandWrittenEvent, clearAutoCompletionEventQueue, clearHandWrittenEventQueue, getAutoCompletionEventQueue, getHandWrittenEventQueue, setContext } from "./state";
 import { getGitBranch, getGitRepoName } from "./git";
 import * as path from "path";
@@ -17,29 +17,27 @@ let previousText: {[file: string]: string} = {};
 let farosPanel: FarosPanel | null = null;
 
 // Function to check and log events every minute
-function checkAndLogEvents() {
+async function checkAndLogEvents() {
   const autoCompletionEvents = getAutoCompletionEventQueue();
   if (autoCompletionEvents.length > 0) {
     console.log("Sending autocompletion events:", autoCompletionEvents);
     try {
-      send(autoCompletionEvents, farosConfig.autoCompletionCategory());
+      await send(autoCompletionEvents, farosConfig.autoCompletionCategory());
+      clearAutoCompletionEventQueue();
     } catch (error) {
       console.error("Error sending autocompletion events:", error);
     }
-    // Clear the events after logging
-    clearAutoCompletionEventQueue();
   }
 
   const handWrittenEvents = getHandWrittenEventQueue();
   if (handWrittenEvents.length > 0) {
     console.log("Sending hand written events:", handWrittenEvents);
     try {
-      send(squash(handWrittenEvents), farosConfig.handWrittenCategory());
+      await send(squash(handWrittenEvents), farosConfig.handWrittenCategory());
+      clearHandWrittenEventQueue();
     } catch (error) {
       console.error("Error sending hand written events:", error);
     }
-    // Clear the events after logging
-    clearHandWrittenEventQueue();
   }
 }
 
@@ -156,12 +154,13 @@ function registerSuggestionListener(context: vscode.ExtensionContext) {
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext): Promise<void> {
   // Use the console to output diagnostic information (console.log) and errors (console.error)
   // This line of code will only be executed once when your extension is activated
   console.log("Faros VSCode extension activate started!");
+  setProtectedConfigStorageUri(context.globalStorageUri);
   setContext(context);
-  updateConfig();
+  await updateConfig();
   registerSuggestionListener(context);
 
   farosPanel = new FarosPanel(context.extensionUri);

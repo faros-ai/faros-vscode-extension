@@ -4,8 +4,20 @@ import {
   Mutation,
   QueryBuilder,
 } from "faros-js-client";
+import { createHmac } from "crypto";
 import { DocumentChangeEvent } from "./types";
 import { farosConfig } from "./config";
+
+export function signedWebhookHeaders(
+  body: string,
+  webhookSecret: string
+): Record<string, string> {
+  const signature = createHmac("sha256", webhookSecret).update(body).digest("hex");
+  return {
+    "Content-Type": "application/json",
+    "X-Faros-Signature": `sha256=${signature}`,
+  };
+}
 
 async function* mutations(
   events: DocumentChangeEvent[],
@@ -94,14 +106,23 @@ async function sendToWebhook(
   webhook: string,
   batch: Mutation[]
 ): Promise<void> {
-  console.log(`Sending ${batch.length} mutations to webhook ${webhook}...`);
-  await fetch(webhook, {
+  console.log(`Sending ${batch.length} mutations to configured Faros webhook...`);
+  const body = JSON.stringify({ query: batchMutation(batch) });
+  const webhookSecret = farosConfig.webhookSecret();
+  if (!webhookSecret) {
+    throw new Error("faros.webhookSecret is required when faros.webhook is configured");
+  }
+  const response = await fetch(webhook, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ query: batchMutation(batch) }),
+    headers: signedWebhookHeaders(body, webhookSecret),
+    body,
   });
+  if (!response.ok) {
+    const responseBody = await response.text().catch(() => '');
+    throw new Error(
+      `Faros webhook request failed: ${response.status} ${response.statusText}${responseBody ? `: ${responseBody}` : ''}`
+    );
+  }
 }
 
 async function debug(batch: Mutation[]): Promise<void> {
