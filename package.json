@@ -151,11 +151,11 @@
     "react-dom": "^18.3.1"
   },
   "overrides": {
-    "form-data": "4.0.4",
+    "form-data": "4.0.5",
     "tar-fs": "^3.1.1",
     "@isaacs/brace-expansion": "5.0.1",
     "lodash": "4.17.23",
-    "axios": "^1.16.1",
-    "fast-uri": "^3.1.2"
+    "axios": "1.16.1",
+    "fast-uri": "3.1.2"
   }
 }
