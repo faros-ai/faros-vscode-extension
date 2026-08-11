@@ -118,8 +118,8 @@
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@babel/core": "^7.25.8",
-    "@babel/preset-react": "^7.25.7",
+    "@babel/core": "^8.0.1",
+    "@babel/preset-react": "^8.0.1",
     "@types/d3": "^7.4.3",
     "@types/node": "^18.19.57",
     "@types/react": "^18.3.11",
@@ -131,7 +131,7 @@
     "@vscode/test-cli": "^0.0.4",
     "@vscode/test-electron": "^2.3.8",
     "@vscode/vsce": "3.6.0",
-    "babel-loader": "^9.2.1",
+    "babel-loader": "^10.1.1",
     "copy-webpack-plugin": "^12.0.2",
     "eslint": "^8.54.0",
     "ts-loader": "^9.5.1",
